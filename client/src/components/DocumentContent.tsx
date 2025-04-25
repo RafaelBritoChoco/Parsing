@@ -10,7 +10,7 @@ interface DocumentContentProps {
 
 export default function DocumentContent({ nodes, onFootnoteClick, rawContent }: DocumentContentProps) {
   // Use o hook para identificar nós dentro de {{text_level}}
-  const textLevelNodesMap = useTextLevel(rawContent, nodes);
+  const textLevelNodesMap = useTextLevel(rawContent || null, nodes);
   // O parâmetro isInsideTextLevel indica se este nó está dentro de {{text_level}}
   const renderContent = (node: DocumentNode, isRoot = false, isInsideTextLevel = false) => {
     // Process content to render footnote references

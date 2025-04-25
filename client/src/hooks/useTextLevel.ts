@@ -6,7 +6,7 @@ import { DocumentNode } from '@/lib/types';
  * baseado em uma análise do conteúdo original
  */
 export function useTextLevel(
-  rawContent: string | null,
+  rawContent: string | null = null,
   nodes: DocumentNode[]
 ): Record<string, boolean> {
   const [textLevelNodes, setTextLevelNodes] = useState<Record<string, boolean>>({});
@@ -17,15 +17,18 @@ export function useTextLevel(
     const textLevelMap: Record<string, boolean> = {};
     
     // Encontra todos os trechos entre {{text_level}} e {{-text_level}}
-    const textLevelRegex = /{{text_level}}(.*?){{-text_level}}/gs;
+    const textLevelRegex = /{{text_level}}([\s\S]*?){{-text_level}}/g;
     const textLevelMatches: string[] = [];
     
     let match;
     while ((match = textLevelRegex.exec(rawContent)) !== null) {
       if (match[1]) {
-        textLevelMatches.push(match[1].trim());
+        // Pegar o conteúdo exato incluindo espaços e quebras de linha
+        textLevelMatches.push(match[1]);
       }
     }
+    
+    console.log("TextLevel matches:", textLevelMatches);
     
     // Para cada nó, verifica se seu conteúdo está em algum dos trechos de text_level
     const checkNodeInTextLevel = (node: DocumentNode) => {
@@ -35,10 +38,18 @@ export function useTextLevel(
         return;
       }
       
-      // Verifica se o conteúdo do nó está em algum trecho de text_level
-      const isInTextLevel = textLevelMatches.some(textLevelContent => 
-        textLevelContent.includes(node.content.trim())
-      );
+      // Abordagem mais direta para verificar se o nó está dentro de text_level
+      const nodeContent = node.content.trim();
+      
+      // Verifica exatamente se o conteúdo do nó está nos trechos de text_level
+      let isInTextLevel = false;
+      
+      for (const textLevelContent of textLevelMatches) {
+        if (textLevelContent.includes(nodeContent)) {
+          isInTextLevel = true;
+          break;
+        }
+      }
       
       textLevelMap[node.id] = isInTextLevel;
       

@@ -417,6 +417,7 @@ export default function DocumentViewer({ document: initialDocument, onReset }: D
             <DocumentContent 
               nodes={getContentNodes()}
               onFootnoteClick={handleFootnoteClick}
+              rawContent={rawContent || savedContent}
             />
 
             {documentData.footnotes.length > 0 && (
