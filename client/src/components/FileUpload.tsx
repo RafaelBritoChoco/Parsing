@@ -10,33 +10,39 @@ import { type ParsedDocument } from "@/lib/types";
  * Função que adiciona quebras de linha antes de cada {{levelx}} (onde x é qualquer número)
  * Não adiciona quebras antes de {{-levelx}}
  * Garante que {{text_level}} sempre esteja sozinho em sua própria linha
+ * Adiciona DUAS quebras de linha para melhor formatação e visualização
  */
 function formatWithLineBreaks(content: string): string {
   let processedContent = content;
   
-  // Passo 1: Adicionar quebra de linha antes de qualquer {{level seguido de número
+  // Passo 1: Adicionar DUAS quebras de linha antes de qualquer {{level seguido de número
   // Isso resolve tanto os casos no início da linha quanto no meio
   const levelRegex = /(^|[^\n])({{level\d+}})/g;
-  processedContent = processedContent.replace(levelRegex, "$1\n$2");
+  processedContent = processedContent.replace(levelRegex, "$1\n\n$2");
   
-  // Passo 2: Adicionar quebra de linha antes de qualquer {{text_level}}
+  // Passo 2: Adicionar DUAS quebras de linha antes e depois de qualquer {{text_level}}
   const textLevelOpenRegex = /(^|[^\n])({{text_level}})/g;
-  processedContent = processedContent.replace(textLevelOpenRegex, "$1\n$2\n");
+  processedContent = processedContent.replace(textLevelOpenRegex, "$1\n\n$2\n\n");
   
-  // Passo 3: Adicionar quebra de linha antes de qualquer {{-text_level}}
+  // Passo 3: Adicionar DUAS quebras de linha antes de qualquer {{-text_level}}
   const textLevelCloseRegex = /(^|[^\n])({{-text_level}})/g;
-  processedContent = processedContent.replace(textLevelCloseRegex, "$1\n$2");
+  processedContent = processedContent.replace(textLevelCloseRegex, "$1\n\n$2");
   
   // Passo 4: Verificar caso especial onde {{text_level}} possa estar junto com outros conteúdos
   // Garantir que {{text_level}} esteja sozinho na linha
   const isolateTextLevelRegex = /(.+)({{text_level}})/g;
-  processedContent = processedContent.replace(isolateTextLevelRegex, "$1\n$2");
+  processedContent = processedContent.replace(isolateTextLevelRegex, "$1\n\n$2");
   
   const isolateTextLevelCloseRegex = /({{-text_level}})(.+)/g;
-  processedContent = processedContent.replace(isolateTextLevelCloseRegex, "$1\n$2");
+  processedContent = processedContent.replace(isolateTextLevelCloseRegex, "$1\n\n$2");
   
-  // Passo 5: Remover linhas em branco duplicadas
-  processedContent = processedContent.replace(/\n\s*\n\s*\n/g, "\n\n");
+  // Passo 5: Adicionar espaço extra após cada {{-levelx}} também
+  const afterClosingLevelRegex = /({{-level\d+}})(.*?)(?=\n|$)/g;
+  processedContent = processedContent.replace(afterClosingLevelRegex, "$1$2\n\n");
+  
+  // Passo 6: Remover mais de duas quebras de linha consecutivas 
+  // para manter o padrão de duas quebras no máximo
+  processedContent = processedContent.replace(/\n\s*\n\s*\n\s*\n/g, "\n\n");
   
   return processedContent;
 }
