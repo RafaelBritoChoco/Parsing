@@ -6,9 +6,10 @@ interface DocumentTreeProps {
   nodes: DocumentNode[];
   selectedNodeId: string;
   onNodeSelect: (nodeId: string) => void;
+  collapsed?: boolean;
 }
 
-export default function DocumentTree({ nodes, selectedNodeId, onNodeSelect }: DocumentTreeProps) {
+export default function DocumentTree({ nodes, selectedNodeId, onNodeSelect, collapsed = false }: DocumentTreeProps) {
   const [expandedNodes, setExpandedNodes] = useState<Record<string, boolean>>({});
   
   const toggleNode = (nodeId: string) => {
@@ -26,6 +27,25 @@ export default function DocumentTree({ nodes, selectedNodeId, onNodeSelect }: Do
     const isExpanded = expandedNodes[node.id] || false;
     const hasChildren = node.children.length > 0;
     const isSelected = node.id === selectedNodeId;
+    
+    // Se a barra lateral estiver recolhida, exibe apenas os ícones
+    if (collapsed) {
+      return (
+        <li key={node.id} className="mb-1">
+          <div 
+            className={`flex justify-center items-center py-1 px-1 rounded-md cursor-pointer hover:bg-[color:hsl(var(--secondary))] ${
+              isSelected ? 'bg-[color:hsl(var(--secondary))] font-medium' : ''
+            }`}
+            onClick={() => onNodeSelect(node.id)}
+            title={node.content}
+          >
+            <span className={`${getLevelColor(node.level)} text-center font-bold`}>
+              {node.level}
+            </span>
+          </div>
+        </li>
+      );
+    }
     
     return (
       <li key={node.id} className="mb-1">

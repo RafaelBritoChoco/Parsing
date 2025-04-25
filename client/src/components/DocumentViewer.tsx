@@ -16,6 +16,7 @@ export default function DocumentViewer({ document: initialDocument, onReset }: D
   const [documentData, setDocumentData] = useState<ParsedDocument>(initialDocument);
   const [selectedNodeId, setSelectedNodeId] = useState<string>(documentData.nodes[0]?.id || "");
   const [showSidebar, setShowSidebar] = useState(true);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [highlightedFootnoteId, setHighlightedFootnoteId] = useState<string | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [rawContent, setRawContent] = useState<string>("");
@@ -220,11 +221,24 @@ export default function DocumentViewer({ document: initialDocument, onReset }: D
       <div 
         className={`${
           showSidebar ? 'flex' : 'hidden'
-        } w-full md:w-1/4 bg-white shadow-md overflow-y-auto flex-col z-20 absolute md:relative inset-0 md:inset-auto`}
+        } ${
+          sidebarCollapsed ? 'md:w-16' : 'md:w-1/4'
+        } w-full bg-white shadow-md overflow-y-auto flex-col z-20 absolute md:relative inset-0 md:inset-auto transition-all duration-300 ease-in-out`}
       >
         <div className="flex items-center justify-between p-4 border-b border-[color:hsl(var(--muted))]">
-          <h2 className="font-semibold text-[color:hsl(var(--primary))]">Document Structure</h2>
-          <div className="flex gap-2">
+          {!sidebarCollapsed && (
+            <h2 className="font-semibold text-[color:hsl(var(--primary))]">Document Structure</h2>
+          )}
+          <div className="flex gap-2 ml-auto">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              className="hidden md:flex"
+            >
+              <ChevronLeft className={`h-4 w-4 transform transition-transform ${sidebarCollapsed ? 'rotate-180' : ''}`} />
+            </Button>
             <Button 
               variant="outline" 
               size="sm"
@@ -248,7 +262,8 @@ export default function DocumentViewer({ document: initialDocument, onReset }: D
           <DocumentTree 
             nodes={documentData.nodes} 
             selectedNodeId={selectedNodeId}
-            onNodeSelect={handleNodeSelect} 
+            onNodeSelect={handleNodeSelect}
+            collapsed={sidebarCollapsed}
           />
         </div>
         
@@ -256,11 +271,13 @@ export default function DocumentViewer({ document: initialDocument, onReset }: D
           <div className="p-4 border-t border-[color:hsl(var(--muted))]">
             <div className="flex items-center gap-2 text-sm font-medium mb-2">
               <Bookmark className="h-4 w-4 text-[color:hsl(var(--accent))]" />
-              <span>Footnotes</span>
+              {!sidebarCollapsed && <span>Footnotes</span>}
             </div>
-            <div className="text-xs">
-              {documentData.footnotes.length} footnote{documentData.footnotes.length !== 1 ? 's' : ''} in this document
-            </div>
+            {!sidebarCollapsed && (
+              <div className="text-xs">
+                {documentData.footnotes.length} footnote{documentData.footnotes.length !== 1 ? 's' : ''} in this document
+              </div>
+            )}
           </div>
         )}
       </div>
