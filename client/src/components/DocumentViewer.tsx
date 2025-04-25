@@ -3,7 +3,7 @@ import DocumentTree from "@/components/DocumentTree";
 import DocumentContent from "@/components/DocumentContent";
 import FootnoteSection from "@/components/FootnoteSection";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, X, AlignLeft, Bookmark, Edit, Download, Eye, Save } from "lucide-react";
+import { ChevronLeft, X, AlignLeft, Bookmark, Edit, Download, Eye, Save, SplitSquareVertical, Info } from "lucide-react";
 import { type ParsedDocument, type DocumentNode } from "@/lib/types";
 import { parseDocument } from "@/lib/documentParser";
 import Editor from 'react-simple-code-editor';
@@ -467,27 +467,45 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
         {/* Barra de ferramentas para alternância entre modos de visualização e edição */}
         <div className="sticky top-0 z-10 bg-white shadow-sm px-4 py-3 border-b flex justify-between items-center">
           <div className="text-sm font-medium bg-blue-50 px-3 py-1 rounded-full text-blue-600 border border-blue-100">
-            {editMode ? 'Editing Mode - Raw Text Format' : 'Preview Mode'}
+            {editMode 
+              ? 'Editing Mode - Raw Text Format' 
+              : comparisonMode 
+                ? 'Comparison Mode' 
+                : 'Preview Mode'}
           </div>
           <div className="flex gap-3">
-            <Button 
-              variant={editMode ? "outline" : "default"}
-              size="sm"
-              onClick={toggleEditMode}
-              className={`gap-1 px-4 rounded-full shadow-sm transition-all ${editMode ? "hover:bg-blue-50 hover:text-blue-600 border-blue-200" : "bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white"}`}
-            >
-              {editMode ? (
-                <>
-                  <Eye className="h-4 w-4" />
-                  <span>Preview</span>
-                </>
-              ) : (
-                <>
-                  <Edit className="h-4 w-4" />
-                  <span>Edit</span>
-                </>
-              )}
-            </Button>
+            {!comparisonMode && (
+              <Button 
+                variant={editMode ? "outline" : "default"}
+                size="sm"
+                onClick={toggleEditMode}
+                className={`gap-1 px-4 rounded-full shadow-sm transition-all ${editMode ? "hover:bg-blue-50 hover:text-blue-600 border-blue-200" : "bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white"}`}
+              >
+                {editMode ? (
+                  <>
+                    <Eye className="h-4 w-4" />
+                    <span>Preview</span>
+                  </>
+                ) : (
+                  <>
+                    <Edit className="h-4 w-4" />
+                    <span>Edit</span>
+                  </>
+                )}
+              </Button>
+            )}
+            
+            {!editMode && (
+              <Button 
+                variant={comparisonMode ? "default" : "outline"}
+                size="sm"
+                onClick={toggleComparisonMode}
+                className={`gap-1 px-4 rounded-full shadow-sm transition-all ${comparisonMode ? "bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600 text-white" : "hover:bg-purple-50 hover:text-purple-600 border-purple-200"}`}
+              >
+                <SplitSquareVertical className="h-4 w-4" />
+                <span>{comparisonMode ? "Exit Comparison" : "Compare Original"}</span>
+              </Button>
+            )}
 
             {editMode && (
               <>
@@ -587,7 +605,57 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
               </ul>
             </div>
           </div>
+        ) : comparisonMode ? (
+          // Modo de comparação - exibe original e processado lado a lado
+          <div className="flex-1 flex flex-col md:flex-row">
+            {/* Painel esquerdo - Documento original */}
+            <div className="w-full md:w-1/2 border-b md:border-b-0 md:border-r border-gray-200 overflow-auto">
+              <div className="sticky top-0 z-10 bg-gray-50 px-4 py-2 border-b border-gray-200 text-sm font-medium">
+                Original Document
+              </div>
+              <div className="p-4 font-mono text-sm whitespace-pre-wrap original-document-content">
+                {originalContent ? (
+                  <div dangerouslySetInnerHTML={{ 
+                    __html: originalContent
+                      .replace(/\{\{level([0-9])\}\}/g, '<span class="tag-level$1">{{level$1}}</span>')
+                      .replace(/\{\{-level([0-9])\}\}/g, '<span class="tag-level$1">{{-level$1}}</span>')
+                      .replace(/\{\{text_level\}\}/g, '<span class="tag-text-level">{{text_level}}</span>')
+                      .replace(/\{\{-text_level\}\}/g, '<span class="tag-text-level">{{-text_level}}</span>')
+                      .replace(/\{\{footnote([0-9]+)\}\}/g, '<span class="tag-footnote">{{footnote$1}}</span>')
+                      .replace(/\{\{-footnote([0-9]+)\}\}/g, '<span class="tag-footnote">{{-footnote$1}}</span>')
+                      .replace(/\{\{footnotenumber([0-9]+)\}\}/g, '<span class="tag-footnote">{{footnotenumber$1}}</span>')
+                      .replace(/\{\{-footnotenumber([0-9]+)\}\}/g, '<span class="tag-footnote">{{-footnotenumber$1}}</span>')
+                      .replace(/\n/g, '<br>')
+                  }} />
+                ) : (
+                  "No original content available for comparison"
+                )}
+              </div>
+            </div>
+            
+            {/* Painel direito - Documento processado */}
+            <div className="w-full md:w-1/2 overflow-auto">
+              <div className="sticky top-0 z-10 bg-gray-50 px-4 py-2 border-b border-gray-200 text-sm font-medium">
+                Processed Document
+              </div>
+              <div>
+                <DocumentContent 
+                  nodes={getContentNodes()}
+                  onFootnoteClick={handleFootnoteClick}
+                  rawContent={originalContent || rawContent || savedContent}
+                />
+                
+                {documentData.footnotes.length > 0 && (
+                  <FootnoteSection 
+                    footnotes={documentData.footnotes} 
+                    highlightedFootnoteId={highlightedFootnoteId}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
         ) : (
+          // Modo de visualização normal
           <>
             <DocumentContent 
               nodes={getContentNodes()}

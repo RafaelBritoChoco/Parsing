@@ -493,3 +493,26 @@ pre {
   padding: 2px 4px;
   border-radius: 3px;
 }
+
+/* Estilos para o modo de comparação */
+.original-document-content {
+  line-height: 1.6;
+  color: #333;
+  font-family: "Fira Code", "Fira Mono", monospace;
+}
+
+/* Tags coloridas no documento original */
+.original-document-content .tag-level0 { color: #0d47a1; font-weight: bold; }
+.original-document-content .tag-level1 { color: #e53935; font-weight: bold; }
+.original-document-content .tag-level2 { color: #ff9800; font-weight: bold; }
+.original-document-content .tag-level3 { color: #2196f3; font-weight: bold; }
+.original-document-content .tag-level4 { color: #4caf50; font-weight: bold; }
+.original-document-content .tag-level5 { color: #e91e63; font-weight: bold; }
+.original-document-content .tag-level6 { color: #b7940e; font-weight: bold; }
+.original-document-content .tag-text-level { color: #ffd600; font-weight: bold; }
+.original-document-content .tag-footnote { color: #9c27b0; font-weight: bold; }
+
+/* Sincronização de rolagem entre painéis */
+.sync-scroll {
+  scroll-behavior: smooth;
+}
