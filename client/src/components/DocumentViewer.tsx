@@ -57,27 +57,57 @@ const highlightWithColors = (code: string) => {
   );
   
   // Níveis genéricos (7, 8, 9, etc.)
+  // Vamos tratar apenas níveis 7-9 explicitamente para evitar problemas com a substituição
   formattedCode = formattedCode.replace(
-    /(\{\{level(\d+)\}\})([\s\S]*?)(\{\{-level\2\}\})/g, 
-    '<span class="level$2">$1</span><span class="level$2-content">$3</span><span class="level$2">$4</span>'
-  );
-  
-  // Text level com amarelo forte - tanto as tags quanto o conteúdo
-  formattedCode = formattedCode.replace(
-    /(\{\{text_level\}\})([\s\S]*?)(\{\{-text_level\}\})/g,
-    '<span class="text-level">$1</span><span class="text-level-content">$2</span><span class="text-level">$3</span>'
-  );
-  
-  // Footnotes e footnote numbers
-  formattedCode = formattedCode.replace(
-    /(\{\{footnote(\d+)\}\})([\s\S]*?)(\{\{-footnote\2\}\})/g,
-    '<span class="footnote">$1</span><span class="footnote-content">$3</span><span class="footnote">$4</span>'
+    /(\{\{level7\}\})([\s\S]*?)(\{\{-level7\}\})/g, 
+    '<span class="level7">$1</span><span class="level7-content">$2</span><span class="level7">$3</span>'
   );
   
   formattedCode = formattedCode.replace(
-    /(\{\{footnotenumber(\d+)\}\})(\d+)(\{\{-footnotenumber\2\}\})/g, 
-    '<span class="footnumber">$1</span><span class="footnumber-content">$3</span><span class="footnumber">$4</span>'
+    /(\{\{level8\}\})([\s\S]*?)(\{\{-level8\}\})/g, 
+    '<span class="level8">$1</span><span class="level8-content">$2</span><span class="level8">$3</span>'
   );
+  
+  formattedCode = formattedCode.replace(
+    /(\{\{level9\}\})([\s\S]*?)(\{\{-level9\}\})/g, 
+    '<span class="level9">$1</span><span class="level9-content">$2</span><span class="level9">$3</span>'
+  );
+  
+  // Tratamento simplificado apenas para as tags text_level
+  formattedCode = formattedCode.replace(/\{\{text_level\}\}/g, '<span class="text-level">{{text_level}}</span>');
+  formattedCode = formattedCode.replace(/\{\{-text_level\}\}/g, '<span class="text-level">{{-text_level}}</span>');
+  
+  // Footnotes - processamos cada uma individualmente para evitar problemas com captura de grupos
+  formattedCode = formattedCode.replace(/\{\{footnote1\}\}/g, '<span class="footnote">{{footnote1}}</span>');
+  formattedCode = formattedCode.replace(/\{\{-footnote1\}\}/g, '<span class="footnote">{{-footnote1}}</span>');
+  
+  formattedCode = formattedCode.replace(/\{\{footnote2\}\}/g, '<span class="footnote">{{footnote2}}</span>');
+  formattedCode = formattedCode.replace(/\{\{-footnote2\}\}/g, '<span class="footnote">{{-footnote2}}</span>');
+  
+  formattedCode = formattedCode.replace(/\{\{footnote3\}\}/g, '<span class="footnote">{{footnote3}}</span>');
+  formattedCode = formattedCode.replace(/\{\{-footnote3\}\}/g, '<span class="footnote">{{-footnote3}}</span>');
+  
+  formattedCode = formattedCode.replace(/\{\{footnote4\}\}/g, '<span class="footnote">{{footnote4}}</span>');
+  formattedCode = formattedCode.replace(/\{\{-footnote4\}\}/g, '<span class="footnote">{{-footnote4}}</span>');
+  
+  formattedCode = formattedCode.replace(/\{\{footnote5\}\}/g, '<span class="footnote">{{footnote5}}</span>');
+  formattedCode = formattedCode.replace(/\{\{-footnote5\}\}/g, '<span class="footnote">{{-footnote5}}</span>');
+  
+  // Footnote numbers - também tratados individualmente
+  formattedCode = formattedCode.replace(/\{\{footnotenumber1\}\}/g, '<span class="footnumber">{{footnotenumber1}}</span>');
+  formattedCode = formattedCode.replace(/\{\{-footnotenumber1\}\}/g, '<span class="footnumber">{{-footnotenumber1}}</span>');
+  
+  formattedCode = formattedCode.replace(/\{\{footnotenumber2\}\}/g, '<span class="footnumber">{{footnotenumber2}}</span>');
+  formattedCode = formattedCode.replace(/\{\{-footnotenumber2\}\}/g, '<span class="footnumber">{{-footnotenumber2}}</span>');
+  
+  formattedCode = formattedCode.replace(/\{\{footnotenumber3\}\}/g, '<span class="footnumber">{{footnotenumber3}}</span>');
+  formattedCode = formattedCode.replace(/\{\{-footnotenumber3\}\}/g, '<span class="footnumber">{{-footnotenumber3}}</span>');
+  
+  formattedCode = formattedCode.replace(/\{\{footnotenumber4\}\}/g, '<span class="footnumber">{{footnotenumber4}}</span>');
+  formattedCode = formattedCode.replace(/\{\{-footnotenumber4\}\}/g, '<span class="footnumber">{{-footnotenumber4}}</span>');
+  
+  formattedCode = formattedCode.replace(/\{\{footnotenumber5\}\}/g, '<span class="footnumber">{{footnotenumber5}}</span>');
+  formattedCode = formattedCode.replace(/\{\{-footnotenumber5\}\}/g, '<span class="footnumber">{{-footnotenumber5}}</span>');
   
   return formattedCode;
 };
