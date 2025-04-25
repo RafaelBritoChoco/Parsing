@@ -20,6 +20,10 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
+        <div className="flex flex-col items-center justify-center px-4 py-8 bg-gradient-to-b from-gray-50 to-white">
+          <h1 className="text-3xl font-bold text-gray-900 text-center">DPA Parser Checker</h1>
+          <p className="mt-2 text-lg text-gray-600">Tool for checking your parsing before uploading to Clairk</p>
+        </div>
         <Router />
       </TooltipProvider>
     </QueryClientProvider>
