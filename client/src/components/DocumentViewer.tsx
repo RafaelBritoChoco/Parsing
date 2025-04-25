@@ -86,60 +86,81 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
 
   // Função para converter o documento em texto bruto para edição
   const getDocumentRawText = () => {
-    // Uma função recursiva para reconstruir o documento
+    // Uma função recursiva para reconstruir o documento com o formato exato solicitado
     const buildRawText = (nodes: DocumentNode[], depth = 0, isInTextLevel = false): string => {
       let result = "";
-      let textLevelContent = "";
-      let hasTextLevelContent = false;
-
-      for (const node of nodes) {
-        // Se estamos processando nós dentro de um text_level
-        if (node.inTextLevel && !isInTextLevel) {
-          // Este é um nó dentro de text_level mas não estamos dentro de um bloco text_level ainda
-          // Vamos coletar todos os nós inTextLevel e colocá-los dentro de um único bloco text_level
-          hasTextLevelContent = true;
-          
-          // Formato exato: tag de abertura, conteúdo e tag de fechamento em linhas separadas
-          textLevelContent += `\n\n{{level${node.level}}}\n${node.content}\n{{-level${node.level}}}\n\n`;
-          
-          // Processar filhos, se houver, dentro do mesmo text_level
-          if (node.children.length > 0) {
-            textLevelContent += buildRawText(node.children, depth + 1, true);
+      
+      // Em vez de usar textLevelContent, vamos reformular para processar cada nó individualmente
+      // e formatá-los com exatidão
+      
+      if (isInTextLevel) {
+        // Se já estamos em um text_level, processamos cada nó individualmente
+        for (const node of nodes) {
+          if (!node.isText) {
+            // Formatação com quebra de linha antes e depois de cada tag
+            result += `\n\n{{level${node.level}}}\n${node.content}\n{{-level${node.level}}}\n\n`;
+            
+            // Processar filhos recursivamente
+            if (node.children.length > 0) {
+              result += buildRawText(node.children, depth + 1, true);
+            }
+          } else {
+            // Para nós de texto
+            result += `\n${node.content}\n`;
           }
         }
-        // Para nós regulares (fora de text_level)
-        else if (!node.isText && !node.inTextLevel) {
-          // Formato exato: tag de abertura, conteúdo e tag de fechamento em linhas separadas
-          result += `\n\n{{level${node.level}}}\n${node.content}\n{{-level${node.level}}}\n\n`;
-
-          // Processar filhos, se houver
-          if (node.children.length > 0) {
-            result += buildRawText(node.children, depth + 1, false);
+      } else {
+        // Processamento normal de nós fora de text_level
+        
+        // Primeiro, agrupamos os nós por tipo (inTextLevel ou não)
+        const textLevelNodes: DocumentNode[] = [];
+        const regularNodes: DocumentNode[] = [];
+        
+        for (const node of nodes) {
+          if (node.inTextLevel) {
+            textLevelNodes.push(node);
+          } else {
+            regularNodes.push(node);
           }
-        } 
-        // Para nós de texto regular (text_level direto)
-        else if (node.isText) {
-          // {{text_level}} em uma linha separada, com espaço antes e depois
-          result += `\n\n{{text_level}}\n\n${node.content}\n\n{{-text_level}}\n\n`;
         }
-        // Nós dentro de um text_level já aberto
-        else if (isInTextLevel) {
-          // Formato exato: tag de abertura, conteúdo e tag de fechamento em linhas separadas
-          result += `\n\n{{level${node.level}}}\n${node.content}\n{{-level${node.level}}}\n\n`;
-          
-          // Processar filhos, se houver, dentro do mesmo text_level
-          if (node.children.length > 0) {
-            result += buildRawText(node.children, depth + 1, true);
+        
+        // Processamos os nós regulares
+        for (const node of regularNodes) {
+          if (!node.isText) {
+            // Formato exato: tag de abertura na própria linha, conteúdo, tag de fechamento na própria linha
+            result += `\n\n{{level${node.level}}}\n${node.content}\n{{-level${node.level}}}\n\n`;
+            
+            // Processar filhos
+            if (node.children.length > 0) {
+              result += buildRawText(node.children, depth + 1, false);
+            }
+          } else if (node.isText) {
+            // Para text_level direto
+            result += `\n\n{{text_level}}\n\n${node.content}\n\n{{-text_level}}\n\n`;
           }
+        }
+        
+        // Agora processamos os nós de text_level como um grupo
+        if (textLevelNodes.length > 0) {
+          // Tag de abertura do text_level na sua própria linha com espaço
+          result += `\n\n{{text_level}}\n\n`;
+          
+          // Processar cada nó dentro do text_level
+          for (const node of textLevelNodes) {
+            // Formato exato: tag de abertura, conteúdo e tag de fechamento em linhas separadas
+            result += `{{level${node.level}}}\n${node.content}\n{{-level${node.level}}}\n\n`;
+            
+            // Processar filhos se houver
+            if (node.children.length > 0) {
+              result += buildRawText(node.children, depth + 1, true);
+            }
+          }
+          
+          // Tag de fechamento do text_level na sua própria linha com espaço
+          result += `{{-text_level}}\n\n`;
         }
       }
-
-      // Se coletamos conteúdo de text_level, adicionamos ele com as tags apropriadas
-      // Pular uma linha antes e depois de {{text_level}} e {{-text_level}}
-      if (hasTextLevelContent) {
-        result += `\n\n{{text_level}}\n\n${textLevelContent}\n\n{{-text_level}}\n\n`;
-      }
-
+      
       return result;
     };
 
