@@ -1,4 +1,5 @@
 import { type DocumentNode } from "@/lib/types";
+import TextLevelWrapper from "./TextLevelWrapper";
 
 interface DocumentContentProps {
   nodes: DocumentNode[];
