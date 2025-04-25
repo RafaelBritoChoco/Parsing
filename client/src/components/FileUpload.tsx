@@ -136,7 +136,7 @@ export default function FileUpload({ onDocumentParsed }: FileUploadProps) {
             <img 
               src="/src/assets/dpa-logo.png" 
               alt="Digital Policy Alert" 
-              className="h-12 mb-4"
+              className="h-8 w-auto mb-4 mx-auto"
             />
             <h2 className="text-2xl font-semibold text-center text-[color:hsl(var(--primary))]">
               Parsing Check
