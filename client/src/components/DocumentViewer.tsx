@@ -3,7 +3,7 @@ import DocumentTree from "@/components/DocumentTree";
 import DocumentContent from "@/components/DocumentContent";
 import FootnoteSection from "@/components/FootnoteSection";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, X, AlignLeft, Bookmark } from "lucide-react";
+import { ChevronLeft, X, AlignLeft, Bookmark, Edit, Download, Eye } from "lucide-react";
 import { type ParsedDocument, type DocumentNode } from "@/lib/types";
 
 interface DocumentViewerProps {
@@ -11,11 +11,88 @@ interface DocumentViewerProps {
   onReset: () => void;
 }
 
-export default function DocumentViewer({ document, onReset }: DocumentViewerProps) {
-  const [selectedNodeId, setSelectedNodeId] = useState<string>(document.nodes[0]?.id || "");
+export default function DocumentViewer({ document: documentData, onReset }: DocumentViewerProps) {
+  const [selectedNodeId, setSelectedNodeId] = useState<string>(documentData.nodes[0]?.id || "");
   const [showSidebar, setShowSidebar] = useState(true);
   const [highlightedFootnoteId, setHighlightedFootnoteId] = useState<string | null>(null);
+  const [editMode, setEditMode] = useState(false);
+  const [rawContent, setRawContent] = useState<string>("");
   
+  // Função para converter o documento em texto bruto para edição
+  const getDocumentRawText = () => {
+    // Uma função recursiva para reconstruir o documento
+    const buildRawText = (nodes: DocumentNode[], depth = 0): string => {
+      let result = "";
+      
+      for (const node of nodes) {
+        // Adiciona as tags de nível e o conteúdo
+        if (!node.isText) {
+          result += `{{level${node.level}}}${node.content}{{-level${node.level}}}\n`;
+          // Processa recursivamente os filhos
+          if (node.children.length > 0) {
+            result += buildRawText(node.children, depth + 1);
+          }
+        } else {
+          // Para nós de texto, apenas adicionamos o conteúdo bruto
+          if (node.level > 0) {
+            result += `{{text_level}}${node.content}{{-text_level}}\n`;
+          } else {
+            result += `${node.content}\n`;
+          }
+        }
+      }
+      
+      return result;
+    };
+    
+    // Adiciona as notas de rodapé no final
+    const buildFootnotes = (): string => {
+      let result = "\n\n";
+      
+      for (const footnote of documentData.footnotes) {
+        result += `{{footnote${footnote.id}}}${footnote.content}{{-footnote${footnote.id}}}\n`;
+      }
+      
+      return result;
+    };
+    
+    const rawText = buildRawText(documentData.nodes) + buildFootnotes();
+    return rawText;
+  };
+
+  const toggleEditMode = () => {
+    if (!editMode) {
+      // Entrando no modo de edição
+      const rawText = getDocumentRawText();
+      setRawContent(rawText);
+    }
+    setEditMode(!editMode);
+  };
+  
+  const handleDownload = () => {
+    // Cria um blob com o conteúdo bruto
+    const blob = new Blob([rawContent], { type: 'text/plain' });
+    
+    // Cria um URL temporário para o download
+    const url = URL.createObjectURL(blob);
+    
+    // Cria um elemento de âncora para o download
+    const a = window.document.createElement('a');
+    a.href = url;
+    // Usa o título do documento ParsedDocument ou um nome padrão
+    a.download = document.title ? `${document.title}.txt` : 'document.txt';
+    
+    // Adiciona o elemento ao documento, clica nele e o remove
+    window.document.body.appendChild(a);
+    a.click();
+    
+    // Limpa o URL e remove o elemento
+    setTimeout(() => {
+      window.document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 100);
+  };
+
   const handleNodeSelect = (nodeId: string) => {
     setSelectedNodeId(nodeId);
     // On mobile, hide sidebar after selection
@@ -137,16 +214,78 @@ export default function DocumentViewer({ document, onReset }: DocumentViewerProp
 
       {/* Content Area */}
       <div className="flex-1 overflow-y-auto bg-white flex flex-col">
-        <DocumentContent 
-          nodes={getContentNodes()}
-          onFootnoteClick={handleFootnoteClick}
-        />
-        
-        {document.footnotes.length > 0 && (
-          <FootnoteSection 
-            footnotes={document.footnotes} 
-            highlightedFootnoteId={highlightedFootnoteId}
-          />
+        {/* Barra de ferramentas para alternância entre modos de visualização e edição */}
+        <div className="sticky top-0 z-10 bg-white shadow-sm p-2 border-b flex justify-between items-center">
+          <div className="text-sm font-medium text-gray-600">
+            {editMode ? 'Editing Mode - Raw Text Format' : 'Preview Mode'}
+          </div>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={toggleEditMode}
+              className="gap-1"
+            >
+              {editMode ? (
+                <>
+                  <Eye className="h-4 w-4" />
+                  <span>Preview</span>
+                </>
+              ) : (
+                <>
+                  <Edit className="h-4 w-4" />
+                  <span>Edit</span>
+                </>
+              )}
+            </Button>
+            
+            {editMode && (
+              <Button 
+                variant="default"
+                size="sm"
+                onClick={handleDownload}
+                className="gap-1"
+              >
+                <Download className="h-4 w-4" />
+                <span>Download</span>
+              </Button>
+            )}
+          </div>
+        </div>
+      
+        {editMode ? (
+          <div className="p-4 flex-1 flex flex-col">
+            <textarea
+              className="flex-1 font-mono text-sm p-4 border rounded-md min-h-[400px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={rawContent}
+              onChange={(e) => setRawContent(e.target.value)}
+              placeholder="Edit your document here..."
+            />
+            <div className="mt-4 p-4 bg-gray-50 rounded-md text-sm">
+              <h3 className="text-sm font-medium mb-2">Editing Tips:</h3>
+              <ul className="list-disc pl-4 space-y-1 text-xs">
+                <li>Use <code className="bg-gray-100 px-1 rounded">{'{{levelX}}...{{-levelX}}'}</code> to define document structure (X = 0-9)</li>
+                <li>Use <code className="bg-gray-100 px-1 rounded">{'{{text_level}}...{{-text_level}}'}</code> for content inside sections</li>
+                <li>Use <code className="bg-gray-100 px-1 rounded">{'{{footnotenumberX}}X{{-footnotenumberX}}'}</code> for footnote references</li>
+                <li>Use <code className="bg-gray-100 px-1 rounded">{'{{footnoteX}}...{{-footnoteX}}'}</code> to define footnotes</li>
+                <li>Download your edited document by clicking the button above</li>
+              </ul>
+            </div>
+          </div>
+        ) : (
+          <>
+            <DocumentContent 
+              nodes={getContentNodes()}
+              onFootnoteClick={handleFootnoteClick}
+            />
+            
+            {document.footnotes.length > 0 && (
+              <FootnoteSection 
+                footnotes={document.footnotes} 
+                highlightedFootnoteId={highlightedFootnoteId}
+              />
+            )}
+          </>
         )}
       </div>
     </div>

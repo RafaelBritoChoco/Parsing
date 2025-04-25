@@ -77,7 +77,11 @@ export default function DocumentContent({ nodes, onFootnoteClick }: DocumentCont
       return (
         <div 
           key={node.id}
-          className={`mb-3 text-sm ${isInsideTextLevel ? 'underline decoration-gray-300 underline-offset-4' : 'font-medium'}`}
+          className={`mb-3 text-sm ${
+            isInsideTextLevel 
+              ? 'underline decoration-gray-300 underline-offset-4' 
+              : 'font-medium bg-blue-50 px-2 py-1 rounded-sm border-l-2 border-blue-200'
+          }`}
           dangerouslySetInnerHTML={{ 
             __html: processFootnoteRefs(node.content) 
           }}
