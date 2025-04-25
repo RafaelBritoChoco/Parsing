@@ -51,30 +51,64 @@
   transition: all 0.2s ease;
   position: relative;
   top: -1px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  font-family: system-ui, sans-serif;
+  letter-spacing: 0.03em;
 }
 
 .footnote-ref-circle:hover {
   background-color: #ea580c; /* Laranja mais escuro */
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.25);
+  transform: translateY(-2px) scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+  filter: brightness(1.1);
 }
 
 .footnote-ref-circle:active {
-  transform: translateY(0);
+  transform: translateY(0) scale(0.98);
   box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2);
 }
 
-/* Cores diferentes para cada número de nota de rodapé */
-.footnote-ref-circle[data-footnote-id="1"] { background-color: #ef4444; } /* Vermelho */
-.footnote-ref-circle[data-footnote-id="2"] { background-color: #f97316; } /* Laranja */
-.footnote-ref-circle[data-footnote-id="3"] { background-color: #84cc16; } /* Verde Limão */
-.footnote-ref-circle[data-footnote-id="4"] { background-color: #06b6d4; } /* Ciano */
-.footnote-ref-circle[data-footnote-id="5"] { background-color: #8b5cf6; } /* Violeta */
-.footnote-ref-circle[data-footnote-id="6"] { background-color: #ec4899; } /* Rosa */
-.footnote-ref-circle[data-footnote-id="7"] { background-color: #f59e0b; } /* Amarelo */
-.footnote-ref-circle[data-footnote-id="8"] { background-color: #10b981; } /* Esmeralda */
-.footnote-ref-circle[data-footnote-id="9"] { background-color: #6366f1; } /* Índigo */
-.footnote-ref-circle[data-footnote-id="10"] { background-color: #a855f7; } /* Púrpura */
+/* Cores diferentes para cada número de nota de rodapé - CORES MAIS VIBRANTES */
+.footnote-ref-circle[data-footnote-id="1"] { 
+  background-color: #ff3b30; /* Vermelho vibrante */
+  box-shadow: 0 0 10px rgba(255, 59, 48, 0.6);
+}
+.footnote-ref-circle[data-footnote-id="2"] { 
+  background-color: #ff9500; /* Laranja vibrante */
+  box-shadow: 0 0 10px rgba(255, 149, 0, 0.6);
+}
+.footnote-ref-circle[data-footnote-id="3"] { 
+  background-color: #34c759; /* Verde vibrante */
+  box-shadow: 0 0 10px rgba(52, 199, 89, 0.6);
+}
+.footnote-ref-circle[data-footnote-id="4"] { 
+  background-color: #00c7be; /* Ciano vibrante */
+  box-shadow: 0 0 10px rgba(0, 199, 190, 0.6);
+}
+.footnote-ref-circle[data-footnote-id="5"] { 
+  background-color: #af52de; /* Violeta vibrante */
+  box-shadow: 0 0 10px rgba(175, 82, 222, 0.6);
+}
+.footnote-ref-circle[data-footnote-id="6"] { 
+  background-color: #ff2d55; /* Rosa vibrante */
+  box-shadow: 0 0 10px rgba(255, 45, 85, 0.6);
+}
+.footnote-ref-circle[data-footnote-id="7"] { 
+  background-color: #ffcc00; /* Amarelo vibrante */
+  box-shadow: 0 0 10px rgba(255, 204, 0, 0.6);
+}
+.footnote-ref-circle[data-footnote-id="8"] { 
+  background-color: #00ba7c; /* Esmeralda vibrante */
+  box-shadow: 0 0 10px rgba(0, 186, 124, 0.6);
+}
+.footnote-ref-circle[data-footnote-id="9"] { 
+  background-color: #5856d6; /* Índigo vibrante */
+  box-shadow: 0 0 10px rgba(88, 86, 214, 0.6);
+}
+.footnote-ref-circle[data-footnote-id="10"] { 
+  background-color: #bf5af2; /* Púrpura vibrante */
+  box-shadow: 0 0 10px rgba(191, 90, 242, 0.6);
+}
 
 /* Destaque para footnotes ativos */
 .footnote-highlighted {

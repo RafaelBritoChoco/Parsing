@@ -111,12 +111,8 @@ export function parseDocument(content: string): ParsedDocument {
         let content = match[1].trim();
         
         // Processar notas de rodapé no formato {{footnotenumberN}}N{{-footnotenumberN}}
-        const footnoteRegex = /{{footnotenumber(\d+)}}(\d+){{-footnotenumber\1}}/g;
-        if (footnoteRegex.test(content)) {
-          content = content.replace(footnoteRegex, (_, id, number) => {
-            return `FOOTNOTE_REF_${id}_${number}`;
-          });
-        }
+        // Removemos totalmente o marcador original e o substituímos pelo novo formato
+        content = content.replace(/{{footnotenumber(\d+)}}(\d+){{-footnotenumber\1}}/g, "(FOOTNOTE_$1_$2)");
         
         tokens.push({
           level,

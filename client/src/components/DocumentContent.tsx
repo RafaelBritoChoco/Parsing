@@ -9,13 +9,19 @@ export default function DocumentContent({ nodes, onFootnoteClick }: DocumentCont
   const renderContent = (node: DocumentNode, isRoot = false, isInsideTextLevel = false) => {
     // Process content to render footnote references
     const processFootnoteRefs = (content: string) => {
-      // Primeiro, processa nossos marcadores especiais FOOTNOTE_REF_
-      const specialMarkerRegex = /FOOTNOTE_REF_(\d+)_(\d+)/g;
+      // Primeiro, processa nossos marcadores especiais (FOOTNOTE_N_N)
+      const specialMarkerRegex = /\(FOOTNOTE_(\d+)_(\d+)\)/g;
       let processedContent = content.replace(specialMarkerRegex, (_, id, number) => {
+        return `<a href="#footnote-${id}" class="footnote-ref-circle" data-footnote-id="${id}">(${number})</a>`;
+      });
+      
+      // Compatibilidade com outros formatos anteriores por segurança
+      processedContent = processedContent.replace(/FOOTNOTE_REF_(\d+)_(\d+)/g, (_, id, number) => {
         return `<a href="#footnote-${id}" class="footnote-ref-circle" data-footnote-id="${id}">(${number})</a>`;
       });
 
       // Processa referências de notas de rodapé no formato {{footnotenumberN}}N{{-footnotenumberN}}
+      // Importante: este é um backup caso o processamento anterior não tenha feito a substituição
       const footnoteRegex = /{{footnotenumber(\d+)}}(\d+){{-footnotenumber\1}}/g;
       processedContent = processedContent.replace(footnoteRegex, (_, id, number) => {
         return `<a href="#footnote-${id}" class="footnote-ref-circle" data-footnote-id="${id}">(${number})</a>`;
@@ -88,11 +94,30 @@ export default function DocumentContent({ nodes, onFootnoteClick }: DocumentCont
       // Para fins de demonstração, marcamos que os níveis 2+ geralmente estão dentro de text_level
       const isInTextLevel = node.level >= 2;
       
+      const processedHeadingContent = node.content.includes("FOOTNOTE") || 
+        node.content.includes("{{footnotenumber") ? 
+        <div dangerouslySetInnerHTML={{ __html: processFootnoteRefs(node.content) }} 
+          onClick={(e) => {
+            const target = e.target as HTMLElement;
+            if (target.classList.contains('footnote-ref-circle')) {
+              e.preventDefault();
+              const footnoteId = target.getAttribute('data-footnote-id');
+              if (footnoteId) {
+                onFootnoteClick(footnoteId);
+                const footnoteElement = document.getElementById(`footnote-${footnoteId}`);
+                if (footnoteElement) {
+                  footnoteElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+              }
+            }
+          }} /> 
+        : <>{node.content}</>;
+        
       return (
         <section key={node.id} className={isRoot ? "" : "mb-8"}>
           <h2 className={`${getHeadingSize(node.level)} ${getLevelColor(node.level)} 
             ${isInTextLevel ? 'underline decoration-gray-300 underline-offset-4' : ''}`}>
-            {node.content}
+            {processedHeadingContent}
           </h2>
           
           <div className={`level-content level${node.level}-content`}>
