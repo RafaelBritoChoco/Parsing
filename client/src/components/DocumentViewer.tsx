@@ -351,35 +351,7 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
     }
   };
 
-  // Sincronização de rolagem entre painéis no modo de comparação
-  const syncScroll = (event: React.UIEvent<HTMLDivElement>) => {
-    if (!comparisonMode) return;
-    
-    const sourcePanel = event.currentTarget;
-    const targetPanel = sourcePanel.classList.contains('left-panel') 
-      ? document.querySelector('.right-panel')
-      : document.querySelector('.left-panel');
-    
-    if (targetPanel) {
-      const scrollPercentage = sourcePanel.scrollTop / (sourcePanel.scrollHeight - sourcePanel.clientHeight);
-      const targetScroll = scrollPercentage * (targetPanel.scrollHeight - targetPanel.clientHeight);
-      
-      // Evita loops de eventos aplicando uma flag temporária
-      if (!sourcePanel.classList.contains('scrolling')) {
-        sourcePanel.classList.add('scrolling');
-        targetPanel.classList.add('scrolling');
-        
-        // Aplica a rolagem
-        (targetPanel as HTMLDivElement).scrollTop = targetScroll;
-        
-        // Remove a flag depois de um curto período
-        setTimeout(() => {
-          sourcePanel.classList.remove('scrolling');
-          targetPanel.classList.remove('scrolling');
-        }, 50);
-      }
-    }
-  };
+  // Removemos a sincronização de rolagem para permitir rolagem independente dos painéis
   
   const handleFootnoteClick = (footnoteId: string) => {
     setHighlightedFootnoteId(footnoteId);
@@ -655,9 +627,9 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
           </div>
         ) : comparisonMode ? (
           // Modo de comparação - exibe original e processado lado a lado
-          <div className="flex-1 flex flex-col md:flex-row">
+          <div className="flex-1 flex flex-col md:flex-row overflow-auto">
             {/* Painel esquerdo - Documento original (PDF ou texto) */}
-            <div className="w-full md:w-1/2 border-b md:border-b-0 md:border-r border-gray-200 overflow-auto left-panel">
+            <div className="w-full md:w-1/2 border-b md:border-b-0 md:border-r border-gray-200 overflow-hidden left-panel flex flex-col">
               <div className="sticky top-0 z-10 bg-gray-50 px-4 py-2 border-b border-gray-200 text-sm font-medium flex justify-between items-center">
                 <span>Original Document</span>
                 {!showPdfUpload && pdfUrl && (
@@ -673,45 +645,44 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
                 )}
               </div>
               
-              {showPdfUpload ? (
-                <div className="p-4">
-                  <PdfComparison onPdfLoad={handlePdfLoad} />
-                </div>
-              ) : pdfUrl ? (
-                <div className="p-4">
-                  <PdfViewer pdfUrl={pdfUrl} />
-                </div>
-              ) : (
-                <div className="p-4 font-mono text-sm whitespace-pre-wrap original-document-content">
-                  {originalContent ? (
-                    <div dangerouslySetInnerHTML={{ 
-                      __html: originalContent
-                        .replace(/\{\{level([0-9])\}\}/g, '<span class="tag-level$1">{{level$1}}</span>')
-                        .replace(/\{\{-level([0-9])\}\}/g, '<span class="tag-level$1">{{-level$1}}</span>')
-                        .replace(/\{\{text_level\}\}/g, '<span class="tag-text-level">{{text_level}}</span>')
-                        .replace(/\{\{-text_level\}\}/g, '<span class="tag-text-level">{{-text_level}}</span>')
-                        .replace(/\{\{footnote([0-9]+)\}\}/g, '<span class="tag-footnote">{{footnote$1}}</span>')
-                        .replace(/\{\{-footnote([0-9]+)\}\}/g, '<span class="tag-footnote">{{-footnote$1}}</span>')
-                        .replace(/\{\{footnotenumber([0-9]+)\}\}/g, '<span class="tag-footnote">{{footnotenumber$1}}</span>')
-                        .replace(/\{\{-footnotenumber([0-9]+)\}\}/g, '<span class="tag-footnote">{{-footnotenumber$1}}</span>')
-                        .replace(/\n/g, '<br>')
-                    }} />
-                  ) : (
-                    "No original content available for comparison"
-                  )}
-                </div>
-              )}
+              <div className="flex-1 overflow-auto">
+                {showPdfUpload ? (
+                  <div className="p-4">
+                    <PdfComparison onPdfLoad={handlePdfLoad} />
+                  </div>
+                ) : pdfUrl ? (
+                  <div className="p-0 h-full">
+                    <PdfViewer pdfUrl={pdfUrl} />
+                  </div>
+                ) : (
+                  <div className="p-4 font-mono text-sm whitespace-pre-wrap original-document-content">
+                    {originalContent ? (
+                      <div dangerouslySetInnerHTML={{ 
+                        __html: originalContent
+                          .replace(/\{\{level([0-9])\}\}/g, '<span class="tag-level$1">{{level$1}}</span>')
+                          .replace(/\{\{-level([0-9])\}\}/g, '<span class="tag-level$1">{{-level$1}}</span>')
+                          .replace(/\{\{text_level\}\}/g, '<span class="tag-text-level">{{text_level}}</span>')
+                          .replace(/\{\{-text_level\}\}/g, '<span class="tag-text-level">{{-text_level}}</span>')
+                          .replace(/\{\{footnote([0-9]+)\}\}/g, '<span class="tag-footnote">{{footnote$1}}</span>')
+                          .replace(/\{\{-footnote([0-9]+)\}\}/g, '<span class="tag-footnote">{{-footnote$1}}</span>')
+                          .replace(/\{\{footnotenumber([0-9]+)\}\}/g, '<span class="tag-footnote">{{footnotenumber$1}}</span>')
+                          .replace(/\{\{-footnotenumber([0-9]+)\}\}/g, '<span class="tag-footnote">{{-footnotenumber$1}}</span>')
+                          .replace(/\n/g, '<br>')
+                      }} />
+                    ) : (
+                      "No original content available for comparison"
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
             
             {/* Painel direito - Documento processado */}
-            <div 
-              className="w-full md:w-1/2 overflow-auto right-panel sync-scroll"
-              onScroll={syncScroll}
-            >
+            <div className="w-full md:w-1/2 overflow-hidden right-panel flex flex-col">
               <div className="sticky top-0 z-10 bg-gray-50 px-4 py-2 border-b border-gray-200 text-sm font-medium">
                 Processed Document
               </div>
-              <div>
+              <div className="flex-1 overflow-auto p-4">
                 <DocumentContent 
                   nodes={getContentNodes()}
                   onFootnoteClick={handleFootnoteClick}
