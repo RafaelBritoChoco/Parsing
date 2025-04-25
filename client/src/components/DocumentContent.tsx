@@ -124,7 +124,7 @@ export default function DocumentContent({ nodes, onFootnoteClick, rawContent }: 
       // porque já é feito pelo TextLevelWrapper quando necessário
       const headingStyle = isInTextLevel 
         ? "py-2 px-3 mb-1.5" // Sem fundo amarelo aqui (já aplicado pelo wrapper)
-        : "py-2 px-3 bg-gray-50 rounded shadow-sm mb-1.5"; // Fundo cinza para conteúdo fora de text_level
+        : "py-2 px-3 bg-gray-200 rounded shadow-sm mb-1.5"; // Fundo cinza MAIS ESCURO para conteúdo fora de text_level
       
       const processedHeadingContent = node.content.includes("FOOTNOTE") || 
         node.content.includes("{{footnotenumber") ? 

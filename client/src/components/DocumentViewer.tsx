@@ -61,25 +61,52 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
   // Função para converter o documento em texto bruto para edição
   const getDocumentRawText = () => {
     // Uma função recursiva para reconstruir o documento
-    const buildRawText = (nodes: DocumentNode[], depth = 0): string => {
+    const buildRawText = (nodes: DocumentNode[], depth = 0, isInTextLevel = false): string => {
       let result = "";
+      let textLevelContent = "";
+      let hasTextLevelContent = false;
 
       for (const node of nodes) {
-        // Adiciona as tags de nível e o conteúdo - com quebra de linha dupla após cada tag de nível
-        if (!node.isText) {
+        // Se estamos processando nós dentro de um text_level
+        if (node.inTextLevel && !isInTextLevel) {
+          // Este é um nó dentro de text_level mas não estamos dentro de um bloco text_level ainda
+          // Vamos coletar todos os nós inTextLevel e colocá-los dentro de um único bloco text_level
+          hasTextLevelContent = true;
+          textLevelContent += `{{level${node.level}}}${node.content}{{-level${node.level}}}\n\n`;
+          
+          // Processar filhos, se houver, dentro do mesmo text_level
+          if (node.children.length > 0) {
+            textLevelContent += buildRawText(node.children, depth + 1, true);
+          }
+        }
+        // Para nós regulares (fora de text_level)
+        else if (!node.isText && !node.inTextLevel) {
           result += `{{level${node.level}}}${node.content}{{-level${node.level}}}\n\n`;
 
-          // Process children if they exist
+          // Processar filhos, se houver
           if (node.children.length > 0) {
-            result += buildRawText(node.children, depth + 1);
+            result += buildRawText(node.children, depth + 1, false);
           }
-        } else if (node.isText) {
-          // For text nodes, maintain the text_level tags with proper spacing
-          // Add line break before and after the text_level tags
+        } 
+        // Para nós de texto regular (text_level direto)
+        else if (node.isText) {
+          // Para nós de texto, mantemos as tags text_level com espaçamento adequado
           result += `\n{{text_level}}\n\n${node.content}\n\n{{-text_level}}\n\n`;
-        } else {
-          result += `${node.content}\n\n`;
         }
+        // Nós dentro de um text_level já aberto
+        else if (isInTextLevel) {
+          result += `{{level${node.level}}}${node.content}{{-level${node.level}}}\n\n`;
+          
+          // Processar filhos, se houver, dentro do mesmo text_level
+          if (node.children.length > 0) {
+            result += buildRawText(node.children, depth + 1, true);
+          }
+        }
+      }
+
+      // Se coletamos conteúdo de text_level, adicionamos ele com as tags apropriadas
+      if (hasTextLevelContent) {
+        result += `\n{{text_level}}\n\n${textLevelContent}{{-text_level}}\n\n`;
       }
 
       return result;
