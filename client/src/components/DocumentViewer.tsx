@@ -80,7 +80,7 @@ export default function DocumentViewer({ document: documentData, onReset }: Docu
     const a = window.document.createElement('a');
     a.href = url;
     // Usa o título do documento ParsedDocument ou um nome padrão
-    a.download = document.title ? `${document.title}.txt` : 'document.txt';
+    a.download = documentData.title ? `${documentData.title}.txt` : 'document.txt';
     
     // Adiciona o elemento ao documento, clica nele e o remove
     window.document.body.appendChild(a);
@@ -139,12 +139,12 @@ export default function DocumentViewer({ document: documentData, onReset }: Docu
       return null;
     };
     
-    const selectedNode = findNode(document.nodes, selectedNodeId);
+    const selectedNode = findNode(documentData.nodes, selectedNodeId);
     if (!selectedNode) return [];
     
     // For level0 (document title), show the full document
     if (selectedNode.level === 0) {
-      return document.nodes;
+      return documentData.nodes;
     }
     
     // Otherwise, show the node and its children
@@ -193,20 +193,20 @@ export default function DocumentViewer({ document: documentData, onReset }: Docu
         
         <div className="flex-1 overflow-y-auto p-2">
           <DocumentTree 
-            nodes={document.nodes} 
+            nodes={documentData.nodes} 
             selectedNodeId={selectedNodeId}
             onNodeSelect={handleNodeSelect} 
           />
         </div>
         
-        {document.footnotes.length > 0 && (
+        {documentData.footnotes.length > 0 && (
           <div className="p-4 border-t border-[color:hsl(var(--muted))]">
             <div className="flex items-center gap-2 text-sm font-medium mb-2">
               <Bookmark className="h-4 w-4 text-[color:hsl(var(--accent))]" />
               <span>Footnotes</span>
             </div>
             <div className="text-xs">
-              {document.footnotes.length} footnote{document.footnotes.length !== 1 ? 's' : ''} in this document
+              {documentData.footnotes.length} footnote{documentData.footnotes.length !== 1 ? 's' : ''} in this document
             </div>
           </div>
         )}
@@ -279,9 +279,9 @@ export default function DocumentViewer({ document: documentData, onReset }: Docu
               onFootnoteClick={handleFootnoteClick}
             />
             
-            {document.footnotes.length > 0 && (
+            {documentData.footnotes.length > 0 && (
               <FootnoteSection 
-                footnotes={document.footnotes} 
+                footnotes={documentData.footnotes} 
                 highlightedFootnoteId={highlightedFootnoteId}
               />
             )}
