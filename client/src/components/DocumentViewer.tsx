@@ -98,8 +98,9 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
           // Este é um nó dentro de text_level mas não estamos dentro de um bloco text_level ainda
           // Vamos coletar todos os nós inTextLevel e colocá-los dentro de um único bloco text_level
           hasTextLevelContent = true;
-          // Sempre pular uma linha antes de qualquer {{levelx}}
-          textLevelContent += `\n\n{{level${node.level}}}${node.content}{{-level${node.level}}}`;
+          
+          // Formato exato: tag de abertura, conteúdo e tag de fechamento em linhas separadas
+          textLevelContent += `\n\n{{level${node.level}}}\n${node.content}\n{{-level${node.level}}}\n\n`;
           
           // Processar filhos, se houver, dentro do mesmo text_level
           if (node.children.length > 0) {
@@ -108,8 +109,8 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
         }
         // Para nós regulares (fora de text_level)
         else if (!node.isText && !node.inTextLevel) {
-          // Sempre pular uma linha antes de qualquer {{levelx}}
-          result += `\n\n{{level${node.level}}}${node.content}{{-level${node.level}}}`;
+          // Formato exato: tag de abertura, conteúdo e tag de fechamento em linhas separadas
+          result += `\n\n{{level${node.level}}}\n${node.content}\n{{-level${node.level}}}\n\n`;
 
           // Processar filhos, se houver
           if (node.children.length > 0) {
@@ -118,13 +119,13 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
         } 
         // Para nós de texto regular (text_level direto)
         else if (node.isText) {
-          // Pular uma linha antes e depois de {{text_level}} e {{-text_level}}
+          // {{text_level}} em uma linha separada, com espaço antes e depois
           result += `\n\n{{text_level}}\n\n${node.content}\n\n{{-text_level}}\n\n`;
         }
         // Nós dentro de um text_level já aberto
         else if (isInTextLevel) {
-          // Sempre pular uma linha antes de qualquer {{levelx}}
-          result += `\n\n{{level${node.level}}}${node.content}{{-level${node.level}}}`;
+          // Formato exato: tag de abertura, conteúdo e tag de fechamento em linhas separadas
+          result += `\n\n{{level${node.level}}}\n${node.content}\n{{-level${node.level}}}\n\n`;
           
           // Processar filhos, se houver, dentro do mesmo text_level
           if (node.children.length > 0) {
@@ -147,8 +148,8 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
       let result = "\n\n";
 
       for (const footnote of documentData.footnotes) {
-        // Sempre pular uma linha antes de qualquer {{footnote}}
-        result += `\n\n{{footnote${footnote.id}}}\n${footnote.content}{{-footnote${footnote.id}}}\n\n`;
+        // Formato exato: tag de abertura, conteúdo e tag de fechamento em linhas separadas
+        result += `\n\n{{footnote${footnote.id}}}\n${footnote.content}\n{{-footnote${footnote.id}}}\n\n`;
       }
 
       return result;
