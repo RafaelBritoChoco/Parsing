@@ -48,24 +48,24 @@ export default function DocumentContent({ nodes, onFootnoteClick }: DocumentCont
 
     const getHeadingSize = (level: number, isTextLevel: boolean = false): string => {
       if (isTextLevel) {
-        // Dentro de text_level (como preâmbulo), fontes menores
+        // Dentro de text_level (como preâmbulo), fontes ainda menores
         switch (level) {
-          case 0: return "text-lg font-medium mb-2"; // Reduzido de xl para lg
-          case 1: return "text-base font-medium mb-1.5"; // Reduzido de lg para base
-          case 2: return "text-sm font-medium mb-1"; // Reduzido de base para sm
-          case 3: return "text-sm font-medium mb-1"; // Mantido sm
+          case 0: return "text-base font-medium mb-1"; // Reduzido significativamente
+          case 1: return "text-sm font-medium mb-1"; // Reduzido significativamente
+          case 2: return "text-sm font-medium mb-0.5"; // Reduzido significativamente
+          case 3: return "text-xs font-medium mb-0.5"; // Reduzido significativamente
           case 4: return "text-xs font-medium mb-0.5"; // Mantido xs
-          default: return "text-xs font-normal mb-0.5"; // Mantido xs
+          default: return "text-xs font-normal mb-0"; // Espaçamento mínimo
         }
       } else {
-        // Fora de text_level, com negrito e tamanho maior para destaque
+        // Fora de text_level, também reduzidos mas mantendo hierarquia
         switch (level) {
-          case 0: return "text-3xl font-bold mb-4"; // Mantido igual
-          case 1: return "text-2xl font-bold mb-3"; // Mantido igual
-          case 2: return "text-xl font-bold mb-2"; // Mantido igual
-          case 3: return "text-lg font-bold mb-1.5"; // Mantido igual
-          case 4: return "text-base font-bold mb-1"; // Mantido igual
-          default: return "text-sm font-bold mb-0.5"; // Mantido igual
+          case 0: return "text-xl font-bold mb-2"; // Reduzido de 3xl para xl
+          case 1: return "text-lg font-bold mb-1.5"; // Reduzido de 2xl para lg
+          case 2: return "text-base font-bold mb-1"; // Reduzido de xl para base
+          case 3: return "text-sm font-bold mb-1"; // Reduzido de lg para sm
+          case 4: return "text-xs font-bold mb-0.5"; // Reduzido de base para xs
+          default: return "text-xs font-semibold mb-0.5"; // Mantido xs
         }
       }
     };
@@ -90,10 +90,10 @@ export default function DocumentContent({ nodes, onFootnoteClick }: DocumentCont
       return (
         <div 
           key={node.id}
-          className={`mb-3 ${
+          className={`mb-2 ${
             isInsideTextLevel 
-              ? 'text-base text-gray-800 bg-yellow-50 px-4 py-3 rounded border-l-4 border-yellow-200' // Marca-texto amarelo para conteúdo dentro de text_level
-              : 'text-base font-semibold bg-gray-50 px-4 py-3 rounded shadow-sm' // Fundo cinza sutil para conteúdo fora de text_level
+              ? 'text-sm text-gray-800 bg-yellow-50 px-3 py-2 rounded border-l-4 border-yellow-200' // Marca-texto amarelo para conteúdo dentro de text_level, tamanho reduzido
+              : 'text-sm font-semibold bg-gray-50 px-3 py-2 rounded shadow-sm' // Fundo cinza sutil para conteúdo fora de text_level, tamanho reduzido
           }`}
           dangerouslySetInnerHTML={{ 
             __html: processFootnoteRefs(node.content) 
@@ -142,12 +142,14 @@ export default function DocumentContent({ nodes, onFootnoteClick }: DocumentCont
       const levelColor = getLevelColor(node.level);
         
       return (
-        <section key={node.id} className={isRoot ? "" : "mb-3"}>
+        <section key={node.id} className={isRoot ? "" : "mb-1.5"}>
           <h2 className={`${getHeadingSize(node.level, isInTextLevel)} ${levelColor} ${headingStyle}`}>
             {processedHeadingContent}
           </h2>
           
-          <div className={isInTextLevel ? "pl-4" : "px-2 py-1"}>
+          <div className={isInTextLevel 
+            ? "pl-3 py-1 mt-1 bg-yellow-50 rounded border-l-4 border-yellow-200" // Fundo amarelo para conteúdo dentro de text_level
+            : "px-2 py-1 mt-1"}>
             {node.children.map(child => renderContent(child, false, isInTextLevel))}
           </div>
         </section>
@@ -156,7 +158,7 @@ export default function DocumentContent({ nodes, onFootnoteClick }: DocumentCont
   };
 
   return (
-    <div className="p-6 flex-1">
+    <div className="p-4 flex-1">
       {nodes.length === 0 ? (
         <div className="flex items-center justify-center h-full">
           <p className="text-gray-500">Select a section from the sidebar to view content</p>
