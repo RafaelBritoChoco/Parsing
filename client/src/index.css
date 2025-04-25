@@ -286,16 +286,17 @@
 
 /* Document Level Styles */
 .level-content {
-  @apply pl-2 border-l-2 border-transparent mb-2;
+  @apply border-l-2 border-transparent mb-2;
 }
 
-.level0-content { @apply border-l-[color:hsl(var(--level0))]; }
-.level1-content { @apply border-l-[color:hsl(var(--level1))]; }
-.level2-content { @apply border-l-[color:hsl(var(--level2))]; }
-.level3-content { @apply border-l-[color:hsl(var(--level3))]; }
-.level4-content { @apply border-l-[color:hsl(var(--level4))]; }
-.level5-content { @apply border-l-[color:hsl(var(--level5))]; }
-.level6-content { @apply border-l-[color:hsl(var(--level6))]; }
+/* Espaçamento progressivo para níveis mais aninhados */
+.level0-content { @apply pl-2 border-l-[color:hsl(var(--level0))]; }
+.level1-content { @apply pl-4 border-l-[color:hsl(var(--level1))]; }
+.level2-content { @apply pl-8 border-l-[color:hsl(var(--level2))]; }
+.level3-content { @apply pl-12 border-l-[color:hsl(var(--level3))]; }
+.level4-content { @apply pl-16 border-l-[color:hsl(var(--level4))]; }
+.level5-content { @apply pl-20 border-l-[color:hsl(var(--level5))]; }
+.level6-content { @apply pl-24 border-l-[color:hsl(var(--level6))]; }
 
 /* Footnote Styles */
 .footnote-ref {

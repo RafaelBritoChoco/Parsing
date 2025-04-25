@@ -98,7 +98,7 @@ export default function FootnoteSection({ footnotes, highlightedFootnoteId }: Fo
                   footnote-ref-circle-${footnote.id}`}>
                   {footnote.id}
                 </div>
-                <span className="text-gray-800">{footnote.content}</span>
+                <span className="text-gray-800 text-sm">{footnote.content}</span>
               </div>
             </div>
           );

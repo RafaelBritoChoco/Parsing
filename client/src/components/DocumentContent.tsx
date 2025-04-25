@@ -48,12 +48,12 @@ export default function DocumentContent({ nodes, onFootnoteClick }: DocumentCont
 
     const getHeadingSize = (level: number): string => {
       switch (level) {
-        case 0: return "text-3xl font-bold mb-6";
-        case 1: return "text-2xl font-semibold mb-4";
-        case 2: return "text-xl font-medium mb-3";
-        case 3: return "text-lg font-medium mb-2";
-        case 4: return "text-base font-medium mb-1";
-        default: return "text-sm font-medium mb-1";
+        case 0: return "text-2xl font-bold mb-6";
+        case 1: return "text-xl font-bold mb-4";
+        case 2: return "text-lg font-bold mb-3";
+        case 3: return "text-base font-bold mb-2";
+        case 4: return "text-sm font-bold mb-1";
+        default: return "text-xs font-bold mb-1";
       }
     };
 
@@ -77,7 +77,7 @@ export default function DocumentContent({ nodes, onFootnoteClick }: DocumentCont
       return (
         <div 
           key={node.id}
-          className={`mb-3 ${isInsideTextLevel ? 'underline decoration-gray-300 underline-offset-4' : ''}`}
+          className={`mb-3 text-sm ${isInsideTextLevel ? 'underline decoration-gray-300 underline-offset-4' : 'font-medium'}`}
           dangerouslySetInnerHTML={{ 
             __html: processFootnoteRefs(node.content) 
           }}
