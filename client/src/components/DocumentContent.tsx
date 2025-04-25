@@ -9,16 +9,22 @@ export default function DocumentContent({ nodes, onFootnoteClick }: DocumentCont
   const renderContent = (node: DocumentNode, isRoot = false, isInsideTextLevel = false) => {
     // Process content to render footnote references
     const processFootnoteRefs = (content: string) => {
+      // Primeiro, processa nossos marcadores especiais FOOTNOTE_REF_
+      const specialMarkerRegex = /FOOTNOTE_REF_(\d+)_(\d+)/g;
+      let processedContent = content.replace(specialMarkerRegex, (_, id, number) => {
+        return `<a href="#footnote-${id}" class="footnote-ref-circle" data-footnote-id="${id}">(${number})</a>`;
+      });
+
       // Processa referências de notas de rodapé no formato {{footnotenumberN}}N{{-footnotenumberN}}
       const footnoteRegex = /{{footnotenumber(\d+)}}(\d+){{-footnotenumber\1}}/g;
-      let processedContent = content.replace(footnoteRegex, (_, id, number) => {
-        return `<a href="#footnote-${id}" class="footnote-ref" data-footnote-id="${id}">${number}</a>`;
+      processedContent = processedContent.replace(footnoteRegex, (_, id, number) => {
+        return `<a href="#footnote-${id}" class="footnote-ref-circle" data-footnote-id="${id}">(${number})</a>`;
       });
       
       // Compatibilidade com o formato antigo
       const oldFootnoteRegex = /{{footnotenumber}}(.*?){{-footnotenumber}}/g;
       processedContent = processedContent.replace(oldFootnoteRegex, (_, number) => {
-        return `<a href="#footnote-${number}" class="footnote-ref" data-footnote-id="${number}">${number}</a>`;
+        return `<a href="#footnote-${number}" class="footnote-ref-circle" data-footnote-id="${number}">(${number})</a>`;
       });
       
       return processedContent;
@@ -62,10 +68,16 @@ export default function DocumentContent({ nodes, onFootnoteClick }: DocumentCont
           onClick={(e) => {
             // Handle footnote reference clicks
             const target = e.target as HTMLElement;
-            if (target.classList.contains('footnote-ref')) {
+            if (target.classList.contains('footnote-ref') || target.classList.contains('footnote-ref-circle')) {
+              e.preventDefault();
               const footnoteId = target.getAttribute('data-footnote-id');
               if (footnoteId) {
                 onFootnoteClick(footnoteId);
+                // Rolagem suave até a nota de rodapé
+                const footnoteElement = document.getElementById(`footnote-${footnoteId}`);
+                if (footnoteElement) {
+                  footnoteElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
               }
             }
           }}

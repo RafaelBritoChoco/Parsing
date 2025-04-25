@@ -65,6 +65,15 @@ export function parseDocument(content: string): ParsedDocument {
     }
   }
   
+  // Processar as notas de rodapé dentro do conteúdo de nível
+  const processFootnoteRef = (content: string): string => {
+    // Processar notas de rodapé no formato {{footnotenumberN}}N{{-footnotenumberN}}
+    const footnoteRegex = /{{footnotenumber(\d+)}}(\d+){{-footnotenumber\1}}/g;
+    return content.replace(footnoteRegex, (_, id, number) => {
+      return `(${number})`;
+    });
+  };
+
   // Process all level tags
   const levelTags: {
     regex: RegExp;
@@ -98,9 +107,20 @@ export function parseDocument(content: string): ParsedDocument {
     let match;
     while ((match = regex.exec(normalizedContent)) !== null) {
       if (match && match[1]) { 
+        // Aplicar processamento de footnotes no conteúdo
+        let content = match[1].trim();
+        
+        // Processar notas de rodapé no formato {{footnotenumberN}}N{{-footnotenumberN}}
+        const footnoteRegex = /{{footnotenumber(\d+)}}(\d+){{-footnotenumber\1}}/g;
+        if (footnoteRegex.test(content)) {
+          content = content.replace(footnoteRegex, (_, id, number) => {
+            return `FOOTNOTE_REF_${id}_${number}`;
+          });
+        }
+        
         tokens.push({
           level,
-          content: match[1].trim(),
+          content: content,
           isText: false,
           start: match.index,
           end: match.index + match[0].length

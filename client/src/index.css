@@ -34,6 +34,48 @@
   transform: scale(0.95);
 }
 
+/* Estilo para as footnotes no formato de parênteses */
+.footnote-ref-circle {
+  display: inline-flex;
+  padding: 0.1rem 0.5rem;
+  font-weight: bold;
+  color: white;
+  background-color: #f97316; /* Laranja */
+  border-radius: 1rem;
+  margin: 0 0.25rem;
+  cursor: pointer;
+  text-decoration: none !important;
+  font-size: 0.85rem;
+  vertical-align: baseline;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+  position: relative;
+  top: -1px;
+}
+
+.footnote-ref-circle:hover {
+  background-color: #ea580c; /* Laranja mais escuro */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.25);
+}
+
+.footnote-ref-circle:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Cores diferentes para cada número de nota de rodapé */
+.footnote-ref-circle[data-footnote-id="1"] { background-color: #ef4444; } /* Vermelho */
+.footnote-ref-circle[data-footnote-id="2"] { background-color: #f97316; } /* Laranja */
+.footnote-ref-circle[data-footnote-id="3"] { background-color: #84cc16; } /* Verde Limão */
+.footnote-ref-circle[data-footnote-id="4"] { background-color: #06b6d4; } /* Ciano */
+.footnote-ref-circle[data-footnote-id="5"] { background-color: #8b5cf6; } /* Violeta */
+.footnote-ref-circle[data-footnote-id="6"] { background-color: #ec4899; } /* Rosa */
+.footnote-ref-circle[data-footnote-id="7"] { background-color: #f59e0b; } /* Amarelo */
+.footnote-ref-circle[data-footnote-id="8"] { background-color: #10b981; } /* Esmeralda */
+.footnote-ref-circle[data-footnote-id="9"] { background-color: #6366f1; } /* Índigo */
+.footnote-ref-circle[data-footnote-id="10"] { background-color: #a855f7; } /* Púrpura */
+
 /* Destaque para footnotes ativos */
 .footnote-highlighted {
   background-color: #f59e0b;
