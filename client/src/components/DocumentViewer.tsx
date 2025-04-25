@@ -345,6 +345,19 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
 
   const handleNodeSelect = (nodeId: string) => {
     setSelectedNodeId(nodeId);
+    
+    // Rolar a página para o topo quando um nó é selecionado
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+    
+    // Garantir que o contêiner principal também é rolado para o topo
+    const contentArea = document.querySelector('.flex-1.overflow-y-auto.bg-white');
+    if (contentArea) {
+      (contentArea as HTMLElement).scrollTop = 0;
+    }
+    
     // On mobile, hide sidebar after selection
     if (window.innerWidth < 768) {
       setShowSidebar(false);
