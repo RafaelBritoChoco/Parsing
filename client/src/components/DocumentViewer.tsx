@@ -549,6 +549,19 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
               </Button>
             )}
             
+            {/* Botão de Scripts - Visível sempre, exceto no modo de comparação */}
+            {!comparisonMode && (
+              <Button 
+                variant="outline"
+                size="sm"
+                onClick={goToScripts}
+                className="gap-1 px-4 rounded-full shadow-sm transition-all hover:bg-amber-50 hover:text-amber-600 border-amber-200"
+              >
+                <Code className="h-4 w-4" />
+                <span>Scripts</span>
+              </Button>
+            )}
+            
             {!editMode && (
               <Button 
                 variant={comparisonMode ? "default" : "outline"}
