@@ -91,7 +91,7 @@ export default function DocumentContent({ nodes, onFootnoteClick, rawContent }: 
       return (
         <div 
           key={node.id}
-          className="mb-2 text-sm text-gray-800 px-3 py-2 rounded shadow-sm"
+          className="mb-2 text-sm px-3 py-2 rounded shadow-sm"
           dangerouslySetInnerHTML={{ 
             __html: processFootnoteRefs(node.content) 
           }}
@@ -145,9 +145,9 @@ export default function DocumentContent({ nodes, onFootnoteClick, rawContent }: 
             {processedHeadingContent}
           </h2>
           
-          <div className={isInTextLevel 
+          <div className={`${levelColor} ${isInTextLevel 
             ? "pl-3 py-0.5 mt-0.5" // Espaçamento vertical menor
-            : "px-2 py-0.5 mt-0.5"}>
+            : "px-2 py-0.5 mt-0.5"}`}>
             {node.children.map(child => renderContent(child, false, isInTextLevel))}
           </div>
         </section>
