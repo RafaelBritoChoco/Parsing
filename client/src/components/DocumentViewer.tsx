@@ -6,11 +6,25 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, X, AlignLeft, Bookmark, Edit, Download, Eye, Save } from "lucide-react";
 import { type ParsedDocument, type DocumentNode } from "@/lib/types";
 import { parseDocument } from "@/lib/documentParser";
+import Editor from 'react-simple-code-editor';
+import Prism from 'prismjs';
 
 interface DocumentViewerProps {
   document: ParsedDocument;
   onReset: () => void;
 }
+
+// Definição do destaque de sintaxe personalizado para nosso formato
+const highlightWithColors = (code: string) => {
+  return code
+    .replace(/(\{\{level[0-9]\}\}.*?\{\{-level[0-9]\}\})/gs, '<span class="tag-level-span">$1</span>')
+    .replace(/(\{\{text_level\}\})/g, '<span class="tag-text-level-span">$1</span>')
+    .replace(/(\{\{-text_level\}\})/g, '<span class="tag-text-level-span">$1</span>')
+    .replace(/(\{\{footnote[0-9]+\}\})/g, '<span class="tag-footnote-span">$1</span>')
+    .replace(/(\{\{-footnote[0-9]+\}\})/g, '<span class="tag-footnote-span">$1</span>')
+    .replace(/(\{\{footnotenumber[0-9]+\}\})/g, '<span class="tag-footnumber-span">$1</span>')
+    .replace(/(\{\{-footnotenumber[0-9]+\}\})/g, '<span class="tag-footnumber-span">$1</span>');
+};
 
 export default function DocumentViewer({ document: initialDocument, onReset }: DocumentViewerProps) {
   const [documentData, setDocumentData] = useState<ParsedDocument>(initialDocument);
