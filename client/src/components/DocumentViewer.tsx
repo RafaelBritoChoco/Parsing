@@ -170,8 +170,8 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
         // Processamos os nós regulares
         for (const node of regularNodes) {
           if (!node.isText) {
-            // Formato com a tag de fechamento {{-levelx}} no final da mesma linha que o conteúdo
-            result += `\n\n{{level${node.level}}}\n${node.content} {{-level${node.level}}}\n\n`;
+            // Formato sem quebra de linha após {{levelX}} para juntar com o conteúdo
+            result += `\n\n{{level${node.level}}}${node.content} {{-level${node.level}}}\n\n`;
             
             // Processar filhos
             if (node.children.length > 0) {
@@ -190,8 +190,8 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
           
           // Processar cada nó dentro do text_level
           for (const node of textLevelNodes) {
-            // Formato com tag de fechamento {{-levelx}} no final da mesma linha que o conteúdo
-            result += `{{level${node.level}}}\n${node.content} {{-level${node.level}}}\n\n`;
+            // Formato sem quebra de linha após {{levelX}} para juntar com o conteúdo
+            result += `{{level${node.level}}}${node.content} {{-level${node.level}}}\n\n`;
             
             // Processar filhos se houver
             if (node.children.length > 0) {
@@ -212,8 +212,8 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
       let result = "\n\n";
 
       for (const footnote of documentData.footnotes) {
-        // Formato exato: tag de abertura, conteúdo e tag de fechamento em linhas separadas
-        result += `\n\n{{footnote${footnote.id}}}\n${footnote.content}\n{{-footnote${footnote.id}}}\n\n`;
+        // Formato com tag de fechamento no final da mesma linha que o conteúdo
+        result += `\n\n{{footnote${footnote.id}}}\n${footnote.content} {{-footnote${footnote.id}}}\n\n`;
       }
 
       return result;

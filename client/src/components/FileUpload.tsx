@@ -55,6 +55,11 @@ function formatWithLineBreaks(content: string): string {
   // "texto ou tag\n{{-levelx}}" e substitui por "texto ou tag {{-levelx}}"
   processedContent = processedContent.replace(/([^\n]+)\n\s*({{-level\d+}})\s*(?=\n|$)/g, "$1 $2\n");
   
+  // Passo 9: Remover quebra de linha após {{levelX}} sozinho em uma linha
+  // Procura por padrões como "{{levelX}}\n" e os substitui por "{{levelX}}"
+  // para que o conteúdo da próxima linha suba para a mesma linha
+  processedContent = processedContent.replace(/(\{\{level\d+\}\})\s*\n+\s*([^\n{])/g, "$1$2");
+  
   return processedContent;
 }
 
