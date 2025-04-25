@@ -14,14 +14,15 @@ export function parseDocument(content: string): ParsedDocument {
   }
 
   // Normalize line endings
-  const normalizedContent = content.replace(/\r\n/g, "\n");
+  let normalizedContent = content.replace(/\r\n/g, "\n");
   
   // Extract document title (level0) if present
   const titleMatch = normalizedContent.match(/{{level0}}(.*?){{-level0}}/s);
   const documentTitle = titleMatch && titleMatch[1] ? titleMatch[1].trim() : "Untitled Document";
   
-  // Extract all footnotes
+  // Extract all footnotes first
   const footnotes: Footnote[] = [];
+  const processedFootnoteIds = new Set<string>();
   
   // Procurar por notas de rodapé no formato {{footnoteN}}N{{-footnoteN}}
   const footnoteFullRegex = /{{footnote(\d+)}}(.*?){{-footnote\1}}/gs;
@@ -29,17 +30,19 @@ export function parseDocument(content: string): ParsedDocument {
   while ((footnoteFullMatch = footnoteFullRegex.exec(normalizedContent)) !== null) {
     if (footnoteFullMatch && footnoteFullMatch[1] && footnoteFullMatch[2]) {
       const footnoteNumber = footnoteFullMatch[1];
-      const footnoteContent = footnoteFullMatch[2].trim();
       
-      footnotes.push({
-        id: footnoteNumber,
-        content: footnoteContent
-      });
+      // Verificar se já temos esta nota
+      if (!processedFootnoteIds.has(footnoteNumber)) {
+        processedFootnoteIds.add(footnoteNumber);
+        
+        const footnoteContent = footnoteFullMatch[2].trim();
+        footnotes.push({
+          id: footnoteNumber,
+          content: footnoteContent
+        });
+      }
     }
   }
-  
-  // Procurar por referências de notas de rodapé no formato {{footnotenumberN}}N{{-footnotenumberN}}
-  const footnoteNumberRegex = /{{footnotenumber(\d+)}}(\d+){{-footnotenumber\1}}/g;
   
   // Para compatibilidade, manter também o formato antigo
   const footnoteRegex = /{{footnote}}(.*?){{-footnote}}/gs;
@@ -51,30 +54,53 @@ export function parseDocument(content: string): ParsedDocument {
       // Try to extract footnote number from content
       const numberMatch = footnoteContent.match(/^(\d+)[\.:\)]\s*(.*)/);
       if (numberMatch && numberMatch[1] && numberMatch[2]) {
-        footnotes.push({
-          id: numberMatch[1],
-          content: numberMatch[2].trim()
-        });
+        const footnoteId = numberMatch[1];
+        
+        // Verificar se já temos esta nota
+        if (!processedFootnoteIds.has(footnoteId)) {
+          processedFootnoteIds.add(footnoteId);
+          
+          footnotes.push({
+            id: footnoteId,
+            content: numberMatch[2].trim()
+          });
+        }
       } else {
         // If no number found, use a placeholder
-        footnotes.push({
-          id: `fn-${footnotes.length + 1}`,
-          content: footnoteContent
-        });
+        const footnoteId = `fn-${footnotes.length + 1}`;
+        
+        if (!processedFootnoteIds.has(footnoteId)) {
+          processedFootnoteIds.add(footnoteId);
+          
+          footnotes.push({
+            id: footnoteId,
+            content: footnoteContent
+          });
+        }
       }
     }
   }
   
-  // Processar as notas de rodapé dentro do conteúdo de nível
-  const processFootnoteRef = (content: string): string => {
-    // Processar notas de rodapé no formato {{footnotenumberN}}N{{-footnotenumberN}}
-    const footnoteRegex = /{{footnotenumber(\d+)}}(\d+){{-footnotenumber\1}}/g;
-    return content.replace(footnoteRegex, (_, id, number) => {
-      return `(${number})`;
-    });
-  };
-
-  // Process all level tags
+  // PRÉ-PROCESSAMENTO: Primeiro, substituir todas as tags de nota de rodapé por marcadores especiais
+  // Isso é crítico para evitar duplicações no documento final
+  
+  // Substituir {{footnotenumberN}}N{{-footnotenumberN}} por marcadores especiais (N) 
+  // onde N é o número da nota
+  normalizedContent = normalizedContent.replace(
+    /{{footnotenumber(\d+)}}(\d+){{-footnotenumber\1}}/g, 
+    "FOOTNOTE_MARKER_$1"
+  );
+  
+  // Interface para definir os tipos de tokens
+  interface Token {
+    level: number;
+    content: string;
+    isText: boolean;
+    start: number;
+    end: number;
+  }
+  
+  // Definir os padrões de nível
   const levelTags: {
     regex: RegExp;
     level: number;
@@ -91,29 +117,17 @@ export function parseDocument(content: string): ParsedDocument {
     { regex: /{{level9}}(.*?){{-level9}}/gs, level: 9 },
   ];
   
-  // Track positions of all tokens for hierarchical construction
-  interface Token {
-    level: number;
-    content: string;
-    isText: boolean;
-    start: number;
-    end: number;
-  }
-  
   const tokens: Token[] = [];
   
-  // Process level tags
+  // Processar tags de nível - esta é a parte principal
   levelTags.forEach(({ regex, level }) => {
     let match;
     while ((match = regex.exec(normalizedContent)) !== null) {
       if (match && match[1]) { 
-        // Aplicar processamento de footnotes no conteúdo
+        // Obter o conteúdo já com marcadores de notas de rodapé
         let content = match[1].trim();
         
-        // Processar notas de rodapé no formato {{footnotenumberN}}N{{-footnotenumberN}}
-        // Removemos totalmente o marcador original e o substituímos pelo novo formato
-        content = content.replace(/{{footnotenumber(\d+)}}(\d+){{-footnotenumber\1}}/g, "(FOOTNOTE_$1_$2)");
-        
+        // Tokens são adicionados exatamente como aparecem no documento
         tokens.push({
           level,
           content: content,
@@ -125,8 +139,7 @@ export function parseDocument(content: string): ParsedDocument {
     }
   });
   
-  // Pré-processamento: procura tags de nível dentro de text_level
-  // Isso é necessário porque no seu formato, os níveis 2, 3, 4, etc. estão dentro de text_level
+  // Processar níveis aninhados em text_level
   const nestedLevelRegex = /{{text_level}}([\s\S]*?){{-text_level}}/g;
   let nestedLevelMatch: RegExpExecArray | null;
   
@@ -135,20 +148,19 @@ export function parseDocument(content: string): ParsedDocument {
     
     const nestedContent = nestedLevelMatch[1];
     
-    // Procura por tags de nível dentro do conteúdo text_level
+    // Procurar por tags de nível dentro do text_level
     for (const { regex, level } of levelTags) {
-      if (level < 2) continue; // Agora processa level2 (preâmbulo) e superiores
+      if (level < 2) continue; // Só interessa level2 e superiores
       
       const levelRegexInner = new RegExp(`{{level${level}}}(.*?){{-level${level}}}`, 'gs');
       let innerMatch: RegExpExecArray | null;
       
       while ((innerMatch = levelRegexInner.exec(nestedContent)) !== null) {
         if (innerMatch && innerMatch[1]) {
-          // Adiciona o nó diretamente aos tokens
           tokens.push({
             level,
             content: innerMatch[1].trim(),
-            isText: false, // Isso é importante - marcamos como não sendo texto
+            isText: false,
             start: nestedLevelMatch.index + innerMatch.index,
             end: nestedLevelMatch.index + innerMatch.index + innerMatch[0].length
           });
@@ -157,19 +169,19 @@ export function parseDocument(content: string): ParsedDocument {
     }
   }
   
-  // Processa text_level tags como texto comum
+  // Processar text_level como texto
   const textRegex = /{{text_level}}(.*?){{-text_level}}/gs;
   let textMatch: RegExpExecArray | null;
+  
   while ((textMatch = textRegex.exec(normalizedContent)) !== null) {
     if (!textMatch || !textMatch[1]) continue;
     
-    // Further process the text to identify and categorize by level
     const textContent = textMatch[1];
     
-    // Precisamos ignorar os trechos com tags de nível que já processamos
+    // Verificar se este conteúdo já tem tags de nível que foram processadas anteriormente
     let shouldProcessAsText = true;
     for (const { level } of levelTags) {
-      if (level < 2) continue; // Agora verificamos a partir do level2 (preâmbulo)
+      if (level < 2) continue;
       
       const levelRegexCheck = new RegExp(`{{level${level}}}.*?{{-level${level}}}`, 'gs');
       if (levelRegexCheck.test(textContent)) {
@@ -180,89 +192,28 @@ export function parseDocument(content: string): ParsedDocument {
     
     if (!shouldProcessAsText) continue;
     
-    // Se chegamos aqui, é realmente conteúdo de texto sem tags de nível
-    const lines = textContent.split("\n");
-    
-    // Process each line in the text section
-    let currentTextLevel = -1;
-    let currentTextContent = "";
-    
-    lines.forEach((line, index) => {
-      if (line === undefined) return;
-      
-      // Check if line contains a level tag - isso é para compatibilidade
-      let lineLevel = -1;
-      let lineContent = line;
-      
-      if (lineLevel >= 0) {
-        // If we have accumulated text from previous lines, add it
-        if (currentTextContent && currentTextContent.trim()) {
-          tokens.push({
-            level: currentTextLevel >= 0 ? currentTextLevel : 9, // Default to high level
-            content: currentTextContent.trim(),
-            isText: true,
-            start: textMatch.index,
-            end: textMatch.index
-          });
-          currentTextContent = "";
-        }
-        
-        // Update current level and start accumulating text
-        currentTextLevel = lineLevel;
-        currentTextContent = lineContent;
-      } else if (line.trim()) {
-        // Continue accumulating text
-        currentTextContent += (currentTextContent ? "\n" : "") + line;
-      } else if (currentTextContent && currentTextContent.trim()) {
-        // Empty line and we have content, add a paragraph break
-        currentTextContent += "\n\n";
-      }
-      
-      // If this is the last line and we have content, add it
-      if (index === lines.length - 1 && currentTextContent && currentTextContent.trim()) {
-        tokens.push({
-          level: currentTextLevel >= 0 ? currentTextLevel : 9, // Default to high level
-          content: currentTextContent.trim(),
-          isText: true,
-          start: textMatch.index,
-          end: textMatch.index
-        });
-      }
+    // Todo o conteúdo como um único bloco de texto
+    tokens.push({
+      level: 9, // Alto nível para texto não estruturado
+      content: textContent.trim(),
+      isText: true,
+      start: textMatch.index,
+      end: textMatch.index + textMatch[0].length
     });
-    
-    // If no tokens were added for this text section, add the whole text as one block
-    if (tokens.length === 0 || tokens.every(t => !t.isText)) {
-      tokens.push({
-        level: 9, // High level for unstructured text
-        content: textContent.trim(),
-        isText: true,
-        start: textMatch.index,
-        end: textMatch.index
-      });
-    }
   }
   
-  // Sort tokens by their position in the document
+  // Ordenar tokens por posição
   tokens.sort((a, b) => a.start - b.start);
   
-  // Remover duplicatas antes de construir a árvore
+  // Remover duplicatas próximas
   const removeDuplicates = () => {
-    // Primeiro ordenamos os tokens por posição
-    tokens.sort((a, b) => a.start - b.start);
-    
-    // Em seguida, remover entradas duplicadas (mesmo conteúdo e nível)
     const uniqueTokens: Token[] = [];
-    const contentMap = new Map<string, boolean>();
+    const MIN_DISTANCE = 200; // Distância mínima para considerar tokens distintos
     
-    // Esta estrutura armazena a distância mínima para considerar dois tokens com o mesmo conteúdo
-    // como sendo efetivamente distintos em vez de duplicatas
-    const MIN_DISTANCE = 200; // Se dois tokens iguais estiverem a menos de 200 caracteres um do outro, consideramos duplicata
-    
-    // Primeiro passo: agrupar tokens por conteúdo e nível
+    // Agrupar por conteúdo e nível
     const tokenGroups: {[key: string]: Token[]} = {};
     
     tokens.forEach(token => {
-      // Cria uma chave única baseada no nível e conteúdo
       const key = `${token.level}:${token.content}`;
       
       if (!tokenGroups[key]) {
@@ -272,26 +223,21 @@ export function parseDocument(content: string): ParsedDocument {
       tokenGroups[key].push(token);
     });
     
-    // Segundo passo: para cada grupo, selecionar apenas tokens que estão suficientemente distantes
+    // Para cada grupo, selecionar tokens suficientemente distantes
     for (const key in tokenGroups) {
       const group = tokenGroups[key];
       
       if (group.length === 1) {
-        // Se só há um token no grupo, não há duplicata
         uniqueTokens.push(group[0]);
       } else {
-        // Ordena por posição
         group.sort((a, b) => a.start - b.start);
         
-        // Adiciona o primeiro token
         let lastAdded = group[0];
         uniqueTokens.push(lastAdded);
         
-        // Para os demais, verificar a distância
         for (let i = 1; i < group.length; i++) {
           const current = group[i];
           
-          // Se estiver longe o suficiente do último adicionado, não é duplicata
           if (current.start - lastAdded.start > MIN_DISTANCE) {
             uniqueTokens.push(current);
             lastAdded = current;
@@ -300,24 +246,37 @@ export function parseDocument(content: string): ParsedDocument {
       }
     }
     
-    // Reclassificar por posição para manter a ordem original
-    uniqueTokens.sort((a, b) => a.start - b.start);
-    
-    return uniqueTokens;
+    return uniqueTokens.sort((a, b) => a.start - b.start);
   };
   
-  // Ordenar tokens e remover duplicatas
   const uniqueTokens = removeDuplicates();
-
-  // Build the hierarchical tree
+  
+  // Converter os marcadores de rodapé de volta para o formato que será processado no componente
+  const processFootnoteMarkers = (tokens: Token[]): Token[] => {
+    return tokens.map(token => {
+      // Substituir FOOTNOTE_MARKER_N pelo formato que o componente espera
+      const content = token.content.replace(
+        /FOOTNOTE_MARKER_(\d+)/g, 
+        "(FOOTNOTE_$1_$1)"
+      );
+      
+      return {
+        ...token,
+        content
+      };
+    });
+  };
+  
+  const processedTokens = processFootnoteMarkers(uniqueTokens);
+  
+  // Construir a árvore hierárquica
   const buildTree = (): DocumentNode[] => {
-    if (uniqueTokens.length === 0) return [];
+    if (processedTokens.length === 0) return [];
     
-    // Create root nodes (level 0) or use a placeholder
     const rootNodes: DocumentNode[] = [];
-    let currentLevelNodes: DocumentNode[][] = [[]]; // Array of node lists for each level
+    let currentLevelNodes: DocumentNode[][] = [[]]; // Array para cada nível
     
-    uniqueTokens.forEach((token, index) => {
+    processedTokens.forEach((token, index) => {
       const node: DocumentNode = {
         id: `node-${index}`,
         level: token.level,
@@ -326,22 +285,21 @@ export function parseDocument(content: string): ParsedDocument {
         children: []
       };
       
-      // Ensure we have arrays for all levels up to current
+      // Garantir que temos arrays para todos os níveis
       while (currentLevelNodes.length <= token.level) {
         currentLevelNodes.push([]);
       }
       
-      // Add node to its level array
+      // Adicionar nó ao seu nível
       currentLevelNodes[token.level].push(node);
       
-      // If this is a level 0 node, add to root
+      // Nível 0 vai para a raiz
       if (token.level === 0) {
         rootNodes.push(node);
       } else {
-        // Find parent node - the last node at the level above
+        // Encontrar o pai no nível acima
         const parentLevel = token.level - 1;
         
-        // Find the most recent parent at the level above
         let parent: DocumentNode | undefined;
         for (let i = parentLevel; i >= 0; i--) {
           if (currentLevelNodes[i].length > 0) {
@@ -353,7 +311,6 @@ export function parseDocument(content: string): ParsedDocument {
         if (parent) {
           parent.children.push(node);
         } else {
-          // If no parent found, add to root (shouldn't happen in well-formed docs)
           rootNodes.push(node);
         }
       }
@@ -364,7 +321,7 @@ export function parseDocument(content: string): ParsedDocument {
   
   const nodes = buildTree();
   
-  // If no nodes were created but we have a title, create a root node
+  // Se não temos nós mas temos um título, criar um nó raiz
   if (nodes.length === 0 && documentTitle !== "Untitled Document") {
     nodes.push({
       id: "node-root",
@@ -374,7 +331,7 @@ export function parseDocument(content: string): ParsedDocument {
       children: []
     });
   }
-
+  
   return {
     title: documentTitle,
     nodes,
