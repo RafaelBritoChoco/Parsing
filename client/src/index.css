@@ -39,11 +39,6 @@
   color: #b7940e !important; /* Mostarda para level6 */
 }
 
-/* Garantir que o texto entre {{levelx}} e {{-levelx}} tem a mesma cor */
-.editor-highlight span[class^="level"] ~ * {
-  color: inherit !important;
-}
-
 .editor-highlight .text-level {
   color: #ffd600 !important; /* Amarelo para text_level */
   font-weight: bold;

@@ -22,10 +22,6 @@ function formatWithLineBreaks(content: string): string {
   const levelRegex = /(^|[^\n])({{level\d+}})/g;
   processedContent = processedContent.replace(levelRegex, "$1\n\n$2");
   
-  // Passo 1.1: Quando uma linha tem apenas {{levelx}}, juntar com o texto da linha seguinte
-  // (removendo a quebra de linha entre eles)
-  processedContent = processedContent.replace(/({{level\d+}})\s*\n+\s*([^\n]+)/g, "$1$2");
-  
   // Passo 2: Adicionar quebra de linha antes de {{footnoteX}}
   const footnoteRegex = /(^|[^\n])({{footnote\d+}})/g;
   processedContent = processedContent.replace(footnoteRegex, "$1\n\n$2");
