@@ -7,7 +7,7 @@ import { parseDocument } from "@/lib/documentParser";
 import { type ParsedDocument } from "@/lib/types";
 
 interface FileUploadProps {
-  onDocumentParsed: (document: ParsedDocument) => void;
+  onDocumentParsed: (document: ParsedDocument, originalContent: string) => void;
 }
 
 export default function FileUpload({ onDocumentParsed }: FileUploadProps) {
@@ -35,7 +35,8 @@ export default function FileUpload({ onDocumentParsed }: FileUploadProps) {
         throw new Error("No valid document structure found in the file");
       }
       
-      onDocumentParsed(parsedDoc);
+      // Passamos tanto o documento parseado quanto o conteúdo original
+      onDocumentParsed(parsedDoc, content);
     } catch (error) {
       toast({
         title: "Error parsing document",

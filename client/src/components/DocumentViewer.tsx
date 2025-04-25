@@ -12,6 +12,7 @@ import Prism from 'prismjs';
 interface DocumentViewerProps {
   document: ParsedDocument;
   onReset: () => void;
+  originalContent?: string; // Conteúdo original do documento
 }
 
 // Função personalizada para colorir tags no texto
@@ -26,16 +27,17 @@ const highlightWithColors = (code: string) => {
     .replace(/(\{\{-footnotenumber[0-9]+\}\})/g, '<span class="tag-footnumber-span">$1</span>');
 };
 
-export default function DocumentViewer({ document: initialDocument, onReset }: DocumentViewerProps) {
+export default function DocumentViewer({ document: initialDocument, onReset, originalContent }: DocumentViewerProps) {
   const [documentData, setDocumentData] = useState<ParsedDocument>(initialDocument);
   const [selectedNodeId, setSelectedNodeId] = useState<string>(documentData.nodes[0]?.id || "");
   const [showSidebar, setShowSidebar] = useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [highlightedFootnoteId, setHighlightedFootnoteId] = useState<string | null>(null);
   const [editMode, setEditMode] = useState(false);
-  const [rawContent, setRawContent] = useState<string>("");
-  const [savedContent, setSavedContent] = useState<string>("");
-  const [documentSaved, setDocumentSaved] = useState(false);
+  // Se temos o conteúdo original, usamos ele; caso contrário, usamos uma string vazia
+  const [rawContent, setRawContent] = useState<string>(originalContent || "");
+  const [savedContent, setSavedContent] = useState<string>(originalContent || "");
+  const [documentSaved, setDocumentSaved] = useState(!!originalContent);
 
   // Efeito para processar o documento quando for salvo
   useEffect(() => {
