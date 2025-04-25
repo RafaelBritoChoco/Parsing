@@ -335,6 +335,36 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
     }
   };
 
+  // Sincronização de rolagem entre painéis no modo de comparação
+  const syncScroll = (event: React.UIEvent<HTMLDivElement>) => {
+    if (!comparisonMode) return;
+    
+    const sourcePanel = event.currentTarget;
+    const targetPanel = sourcePanel.classList.contains('left-panel') 
+      ? document.querySelector('.right-panel')
+      : document.querySelector('.left-panel');
+    
+    if (targetPanel) {
+      const scrollPercentage = sourcePanel.scrollTop / (sourcePanel.scrollHeight - sourcePanel.clientHeight);
+      const targetScroll = scrollPercentage * (targetPanel.scrollHeight - targetPanel.clientHeight);
+      
+      // Evita loops de eventos aplicando uma flag temporária
+      if (!sourcePanel.classList.contains('scrolling')) {
+        sourcePanel.classList.add('scrolling');
+        targetPanel.classList.add('scrolling');
+        
+        // Aplica a rolagem
+        (targetPanel as HTMLDivElement).scrollTop = targetScroll;
+        
+        // Remove a flag depois de um curto período
+        setTimeout(() => {
+          sourcePanel.classList.remove('scrolling');
+          targetPanel.classList.remove('scrolling');
+        }, 50);
+      }
+    }
+  };
+  
   const handleFootnoteClick = (footnoteId: string) => {
     setHighlightedFootnoteId(footnoteId);
 
@@ -609,7 +639,10 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
           // Modo de comparação - exibe original e processado lado a lado
           <div className="flex-1 flex flex-col md:flex-row">
             {/* Painel esquerdo - Documento original */}
-            <div className="w-full md:w-1/2 border-b md:border-b-0 md:border-r border-gray-200 overflow-auto">
+            <div 
+              className="w-full md:w-1/2 border-b md:border-b-0 md:border-r border-gray-200 overflow-auto left-panel sync-scroll"
+              onScroll={syncScroll}
+            >
               <div className="sticky top-0 z-10 bg-gray-50 px-4 py-2 border-b border-gray-200 text-sm font-medium">
                 Original Document
               </div>
@@ -634,7 +667,10 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
             </div>
             
             {/* Painel direito - Documento processado */}
-            <div className="w-full md:w-1/2 overflow-auto">
+            <div 
+              className="w-full md:w-1/2 overflow-auto right-panel sync-scroll"
+              onScroll={syncScroll}
+            >
               <div className="sticky top-0 z-10 bg-gray-50 px-4 py-2 border-b border-gray-200 text-sm font-medium">
                 Processed Document
               </div>
