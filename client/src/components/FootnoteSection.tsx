@@ -71,13 +71,13 @@ export default function FootnoteSection({ footnotes, highlightedFootnoteId }: Fo
   return (
     <section className="mt-8 border-t border-gray-200 pt-8 pb-6">
       <div className="max-w-5xl mx-auto bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl shadow-md border border-blue-100">
-        <h3 className="text-xl font-bold mb-6 flex items-center text-blue-700">
+        <h3 className="text-lg font-bold mb-6 flex items-center text-blue-700">
           <div className="bg-blue-100 p-2 rounded-full mr-3 shadow-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
-          Notas de Rodapé ({footnotes.length})
+          Footnotes ({footnotes.length})
         </h3>
         <div className="space-y-4">
           {footnotes.map(footnote => {
