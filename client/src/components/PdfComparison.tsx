@@ -26,8 +26,9 @@ export default function PdfComparison({ onPdfLoad }: PdfComparisonProps) {
         setSelectedFile(file);
         
         // Verifica se é um PDF para informar ao usuário
-        const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
-        setIsPdf(isPdf);
+        // Sempre consideramos como PDF para fins de visualização, independente do tipo real
+        // Isso ajuda a lidar com casos em que o tipo MIME não está sendo detectado corretamente
+        setIsPdf(true);
         
         // Cria uma URL para o arquivo
         const objectUrl = URL.createObjectURL(file);
