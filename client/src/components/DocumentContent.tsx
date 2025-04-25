@@ -183,6 +183,12 @@ export default function DocumentContent({ nodes, onFootnoteClick, rawContent }: 
               return renderContent(node, true, false);
             }
           })}
+          
+          {/* Para debugar, mostramos quais nós foram marcados como text_level */}
+          {/* <div className="mt-8 p-4 border border-gray-200 rounded-lg bg-gray-50 text-xs">
+            <h3 className="font-bold mb-2">Debug: TextLevel Nodes</h3>
+            <pre>{JSON.stringify(textLevelNodesMap, null, 2)}</pre>
+          </div> */}
         </div>
       )}
     </div>

@@ -12,8 +12,12 @@ export function useTextLevel(
   const [textLevelNodes, setTextLevelNodes] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    if (!rawContent) return;
+    if (!rawContent) {
+      console.log("useTextLevel: rawContent está vazio ou null");
+      return;
+    }
 
+    console.log("useTextLevel: processando rawContent de tamanho:", rawContent.length);
     const textLevelMap: Record<string, boolean> = {};
     
     // Encontra todos os trechos entre {{text_level}} e {{-text_level}}
@@ -28,7 +32,8 @@ export function useTextLevel(
       }
     }
     
-    console.log("TextLevel matches:", textLevelMatches);
+    console.log(`useTextLevel: encontrados ${textLevelMatches.length} blocos text_level`);
+    // console.log("TextLevel matches:", textLevelMatches);
     
     // Para cada nó, verifica se seu conteúdo está em algum dos trechos de text_level
     const checkNodeInTextLevel = (node: DocumentNode) => {
@@ -41,17 +46,30 @@ export function useTextLevel(
       // Abordagem mais direta para verificar se o nó está dentro de text_level
       const nodeContent = node.content.trim();
       
-      // Verifica exatamente se o conteúdo do nó está nos trechos de text_level
+      // Primeiro, verificamos se este nó tem uma tag de level diretamente no rawContent
+      // que esteja dentro de um bloco text_level
+      const levelTagPattern = new RegExp(`{{level${node.level}}}${nodeContent.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}{{-level${node.level}}}`, 'i');
+      
+      // Verifica se o conteúdo do nó está nos trechos de text_level
       let isInTextLevel = false;
       
       for (const textLevelContent of textLevelMatches) {
+        // Verifica se o conteúdo exato do nó está no trecho de text_level
         if (textLevelContent.includes(nodeContent)) {
+          isInTextLevel = true;
+          break;
+        }
+        
+        // Ou verifica se uma tag completa com esse conteúdo está no trecho de text_level
+        if (levelTagPattern.test(textLevelContent)) {
           isInTextLevel = true;
           break;
         }
       }
       
-      textLevelMap[node.id] = isInTextLevel;
+      // Se já houver text_level marcado para este nó (caso ele seja
+      // um nó filho de outro nó em text_level), mantemos o status
+      textLevelMap[node.id] = isInTextLevel || (node.id in textLevelMap ? textLevelMap[node.id] : false);
       
       // Verifica também os filhos
       node.children.forEach(checkNodeInTextLevel);
