@@ -27,16 +27,22 @@ export default function DocumentViewer({ document, onReset }: DocumentViewerProp
   const handleFootnoteClick = (footnoteId: string) => {
     setHighlightedFootnoteId(footnoteId);
     
-    // Scroll to footnote
-    const footnoteElement = document.getElementById(`footnote-${footnoteId}`);
-    if (footnoteElement) {
-      footnoteElement.scrollIntoView({ behavior: "smooth" });
-      
-      // Clear the highlight after a delay
-      setTimeout(() => {
-        setHighlightedFootnoteId(null);
-      }, 3000);
-    }
+    // Scroll to footnote - Usando window.document para garantir que estamos acessando o DOM do navegador
+    setTimeout(() => {
+      const footnoteElement = window.document.getElementById(`footnote-${footnoteId}`);
+      if (footnoteElement) {
+        footnoteElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        
+        // Adicionar um destaque temporário ao elemento
+        footnoteElement.classList.add("footnote-highlight-animation");
+        
+        // Remover o destaque após animação
+        setTimeout(() => {
+          footnoteElement.classList.remove("footnote-highlight-animation");
+          setHighlightedFootnoteId(null);
+        }, 3000);
+      }
+    }, 100); // Pequeno atraso para garantir que o DOM foi atualizado
   };
 
   // Filter out nodes relevant to the current selection for display

@@ -78,12 +78,8 @@ export default function DocumentContent({ nodes, onFootnoteClick }: DocumentCont
               e.preventDefault();
               const footnoteId = target.getAttribute('data-footnote-id');
               if (footnoteId) {
+                // Usamos a callback fornecida para garantir consistência com o componente pai
                 onFootnoteClick(footnoteId);
-                // Rolagem suave até a nota de rodapé
-                const footnoteElement = document.getElementById(`footnote-${footnoteId}`);
-                if (footnoteElement) {
-                  footnoteElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
               }
             }
           }}
@@ -103,11 +99,8 @@ export default function DocumentContent({ nodes, onFootnoteClick }: DocumentCont
               e.preventDefault();
               const footnoteId = target.getAttribute('data-footnote-id');
               if (footnoteId) {
+                // Delegamos a navegação para o componente pai usando a callback
                 onFootnoteClick(footnoteId);
-                const footnoteElement = document.getElementById(`footnote-${footnoteId}`);
-                if (footnoteElement) {
-                  footnoteElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
               }
             }
           }} /> 
