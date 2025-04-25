@@ -98,8 +98,8 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
           // Este é um nó dentro de text_level mas não estamos dentro de um bloco text_level ainda
           // Vamos coletar todos os nós inTextLevel e colocá-los dentro de um único bloco text_level
           hasTextLevelContent = true;
-          // Formatação correta: quebra linha antes do {{levelx}} mas não no {{-levelx}}
-          textLevelContent += `\n{{level${node.level}}}${node.content}{{-level${node.level}}}`;
+          // Sempre pular uma linha antes de qualquer {{levelx}}
+          textLevelContent += `\n\n{{level${node.level}}}${node.content}{{-level${node.level}}}`;
           
           // Processar filhos, se houver, dentro do mesmo text_level
           if (node.children.length > 0) {
@@ -108,8 +108,8 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
         }
         // Para nós regulares (fora de text_level)
         else if (!node.isText && !node.inTextLevel) {
-          // Formatação correta: quebra de linha antes do {{levelx}}
-          result += `\n{{level${node.level}}}${node.content}{{-level${node.level}}}\n`;
+          // Sempre pular uma linha antes de qualquer {{levelx}}
+          result += `\n\n{{level${node.level}}}${node.content}{{-level${node.level}}}`;
 
           // Processar filhos, se houver
           if (node.children.length > 0) {
@@ -118,13 +118,13 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
         } 
         // Para nós de texto regular (text_level direto)
         else if (node.isText) {
-          // Quebra após {{text_level}} e antes de {{-text_level}}
-          result += `\n{{text_level}}\n${node.content}\n{{-text_level}}\n`;
+          // Pular uma linha antes e depois de {{text_level}} e {{-text_level}}
+          result += `\n\n{{text_level}}\n\n${node.content}\n\n{{-text_level}}\n\n`;
         }
         // Nós dentro de um text_level já aberto
         else if (isInTextLevel) {
-          // Formatação correta: quebra linha antes do {{levelx}} mas não no {{-levelx}}
-          result += `\n{{level${node.level}}}${node.content}{{-level${node.level}}}`;
+          // Sempre pular uma linha antes de qualquer {{levelx}}
+          result += `\n\n{{level${node.level}}}${node.content}{{-level${node.level}}}`;
           
           // Processar filhos, se houver, dentro do mesmo text_level
           if (node.children.length > 0) {
@@ -134,9 +134,9 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
       }
 
       // Se coletamos conteúdo de text_level, adicionamos ele com as tags apropriadas
-      // Formatação exata conforme solicitado pelo usuário
+      // Pular uma linha antes e depois de {{text_level}} e {{-text_level}}
       if (hasTextLevelContent) {
-        result += `\n{{text_level}}\n${textLevelContent}\n{{-text_level}}\n`;
+        result += `\n\n{{text_level}}\n\n${textLevelContent}\n\n{{-text_level}}\n\n`;
       }
 
       return result;
@@ -147,8 +147,8 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
       let result = "\n\n";
 
       for (const footnote of documentData.footnotes) {
-        // Quebras de linha antes de {{footnote}} mas não antes de {{-footnote}}
-        result += `\n{{footnote${footnote.id}}}\n${footnote.content}{{-footnote${footnote.id}}}\n`;
+        // Sempre pular uma linha antes de qualquer {{footnote}}
+        result += `\n\n{{footnote${footnote.id}}}\n${footnote.content}{{-footnote${footnote.id}}}\n\n`;
       }
 
       return result;
