@@ -117,8 +117,8 @@ export default function DocumentContent({ nodes, onFootnoteClick, rawContent }: 
       // Definir o estilo com base em text_level, mas não aplicaremos o fundo aqui
       // porque já é feito pelo TextLevelWrapper quando necessário
       const headingStyle = isInTextLevel 
-        ? "py-1 px-3 mb-1" // Espaçamento reduzido para dentro de text_level
-        : "py-1.5 px-3 bg-gray-200 rounded shadow-sm mb-1"; // Espaçamento reduzido para fora de text_level
+        ? "py-0.5 px-3 mb-0.5" // Espaçamento mínimo para dentro de text_level
+        : "py-1 px-3 bg-gray-200 rounded shadow-sm mb-0.5"; // Espaçamento reduzido para fora de text_level
       
       const processedHeadingContent = node.content.includes("FOOTNOTE") || 
         node.content.includes("{{footnotenumber") ? 
@@ -140,14 +140,14 @@ export default function DocumentContent({ nodes, onFootnoteClick, rawContent }: 
       const levelColor = getLevelColor(node.level);
         
       return (
-        <section key={node.id} className={isRoot ? "" : "mb-1.5"}>
+        <section key={node.id} className={isRoot ? "" : "mb-0.5"}>
           <h2 className={`${getHeadingSize(node.level, isInTextLevel)} ${levelColor} ${headingStyle}`}>
             {processedHeadingContent}
           </h2>
           
           <div className={isInTextLevel 
-            ? "pl-3 py-1 mt-1" // Não adicionamos fundo amarelo aqui, pois já vem do wrapper
-            : "px-2 py-1 mt-1"}>
+            ? "pl-3 py-0.5 mt-0.5" // Espaçamento vertical menor
+            : "px-2 py-0.5 mt-0.5"}>
             {node.children.map(child => renderContent(child, false, isInTextLevel))}
           </div>
         </section>

@@ -72,7 +72,7 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
           // Este é um nó dentro de text_level mas não estamos dentro de um bloco text_level ainda
           // Vamos coletar todos os nós inTextLevel e colocá-los dentro de um único bloco text_level
           hasTextLevelContent = true;
-          textLevelContent += `{{level${node.level}}}${node.content}{{-level${node.level}}}\n\n`;
+          textLevelContent += `{{level${node.level}}}${node.content}{{-level${node.level}}}\n`;
           
           // Processar filhos, se houver, dentro do mesmo text_level
           if (node.children.length > 0) {
@@ -90,9 +90,8 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
         } 
         // Para nós de texto regular (text_level direto)
         else if (node.isText) {
-          // Para nós de texto, mantemos as tags text_level com espaçamento adequado
-          // Uma quebra antes de {{text_level}}, duas quebras depois, e uma quebra antes de {{-text_level}}
-          result += `\n{{text_level}}\n\n${node.content}\n{{-text_level}}\n\n`;
+          // Para nós de texto, mantemos as tags text_level com quebra após a tag de abertura
+          result += `{{text_level}}\n${node.content}{{-text_level}}\n\n`;
         }
         // Nós dentro de um text_level já aberto
         else if (isInTextLevel) {
@@ -106,9 +105,9 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
       }
 
       // Se coletamos conteúdo de text_level, adicionamos ele com as tags apropriadas
-      // Garantindo quebras de linha antes e depois de {{text_level}} e {{-text_level}}
+      // Formatação exata conforme solicitado pelo usuário
       if (hasTextLevelContent) {
-        result += `\n{{text_level}}\n\n${textLevelContent}\n{{-text_level}}\n\n`;
+        result += `{{text_level}}\n${textLevelContent}{{-text_level}}\n\n`;
       }
 
       return result;
