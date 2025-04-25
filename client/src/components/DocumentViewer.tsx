@@ -107,25 +107,35 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
   const [rawContent, setRawContent] = useState<string>(originalContent || "");
   const [savedContent, setSavedContent] = useState<string>(originalContent || "");
   const [documentSaved, setDocumentSaved] = useState(!!originalContent);
+  const [hasEdits, setHasEdits] = useState(false); // Rastreia se existem edições não salvas
 
-  // Efeito para processar o documento quando for salvo
+  // Efeito para processar o documento quando for salvo ou ao alternar entre modos
   useEffect(() => {
-    if (documentSaved && savedContent) {
+    if ((documentSaved && savedContent) || (!editMode && hasEdits)) {
       try {
-        // Reanalisamos o documento salvo para atualizar a visualização
-        const parsedDocument = parseDocument(savedContent);
-        setDocumentData(parsedDocument);
-
-        // Atualizamos o ID selecionado para o primeiro nó do novo documento
-        if (parsedDocument.nodes.length > 0) {
-          setSelectedNodeId(parsedDocument.nodes[0].id);
+        // Reanalisamos o documento para atualizar a visualização
+        // Se estiver no modo de edição, usamos rawContent diretamente
+        // Se não estiver no modo de edição, usamos o conteúdo mais recente (rawContent se houver edições)
+        const contentToProcess = editMode ? rawContent : (hasEdits ? rawContent : savedContent);
+        
+        if (contentToProcess) {
+          const parsedDocument = parseDocument(contentToProcess);
+          setDocumentData(parsedDocument);
+  
+          // Atualizamos o ID selecionado para o primeiro nó do novo documento
+          if (parsedDocument.nodes.length > 0) {
+            setSelectedNodeId(parsedDocument.nodes[0].id);
+          }
         }
       } catch (error) {
         console.error("Erro ao analisar o documento:", error);
-        window.alert("Houve um erro ao processar o documento. Verifique se a formatação está correta.");
+        // Só exibimos o alerta se o usuário estiver tentando salvar
+        if (documentSaved) {
+          window.alert("Houve um erro ao processar o documento. Verifique se a formatação está correta.");
+        }
       }
     }
-  }, [savedContent, documentSaved]);
+  }, [savedContent, documentSaved, editMode, rawContent, hasEdits]);
 
   // Função para converter o documento em texto bruto para edição
   const getDocumentRawText = () => {
@@ -226,19 +236,33 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
   const toggleEditMode = () => {
     if (!editMode) {
       // Entrando no modo de edição
-      // Usamos o conteúdo original se disponível, ou recriamos o documento
-      if (originalContent) {
+      // Na primeira vez que entramos no modo de edição
+      if (!rawContent && originalContent) {
         setRawContent(originalContent);
         setSavedContent(originalContent);
-      } else {
+      } else if (!rawContent) {
         const rawText = getDocumentRawText();
         setRawContent(rawText);
         setSavedContent(rawText);
       }
-      setDocumentSaved(true);
-    } else if (documentSaved) {
-      // Voltando para o modo de visualização com alterações salvas
-      setRawContent(savedContent);
+      // Não alteramos o conteúdo atual se já temos um
+      // Isso mantém as alterações que o usuário fez
+      
+      setDocumentSaved(documentSaved);
+    } else {
+      // Voltando para o modo de visualização
+      // Se houver edições, queremos processar o documento com essas edições
+      if (hasEdits) {
+        try {
+          // Tentamos processar o documento com as alterações para garantir
+          // que ele estará disponível no modo de visualização
+          parseDocument(rawContent);
+          // Não salvamos aqui, só verificamos se o parse foi bem-sucedido
+        } catch (error) {
+          console.error("Erro ao pré-processar documento para visualização:", error);
+          // Não exibimos alerta, apenas registramos o erro
+        }
+      }
     }
     setEditMode(!editMode);
   };
@@ -483,7 +507,11 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
             <div className="editor-wrapper flex-1 font-mono text-sm border border-gray-200 rounded-lg min-h-[400px] focus-within:ring-2 focus-within:ring-blue-500 shadow-inner bg-gray-50 overflow-auto">
               <Editor
                 value={rawContent}
-                onValueChange={setRawContent}
+                onValueChange={(newValue) => {
+                  setRawContent(newValue);
+                  setHasEdits(true); // Marca que existem edições
+                  // Isso fará com que as edições sejam preservadas
+                }}
                 highlight={(code) => {
                   return `<div>${highlightWithColors(code)}</div>`;
                 }}
