@@ -6,6 +6,7 @@ interface DocumentContentProps {
 }
 
 export default function DocumentContent({ nodes, onFootnoteClick }: DocumentContentProps) {
+  // O parâmetro isInsideTextLevel indica se este nó está dentro de {{text_level}}
   const renderContent = (node: DocumentNode, isRoot = false, isInsideTextLevel = false) => {
     // Process content to render footnote references
     const processFootnoteRefs = (content: string) => {
@@ -113,9 +114,9 @@ export default function DocumentContent({ nodes, onFootnoteClick }: DocumentCont
         />
       );
     } else {
-      // Determina se este nó está dentro de text_level
-      // Se o nível for 3 ou superior, ou se já estiver marcado como dentro de text_level
-      const isInTextLevel = isInsideTextLevel || false;
+      // Usa a flag passada pelo componente pai para identificar se está dentro de {{text_level}}
+      // Este valor é passado recursivamente para todas as renderizações de nós filhos
+      const isInTextLevel = isInsideTextLevel;
       
       // Definir o estilo com base em text_level - fundo amarelo para dentro de text_level
       const headingStyle = isInTextLevel 
