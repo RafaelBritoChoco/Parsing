@@ -1,17 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DocumentTree from "@/components/DocumentTree";
 import DocumentContent from "@/components/DocumentContent";
 import FootnoteSection from "@/components/FootnoteSection";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, X, AlignLeft, Bookmark, Edit, Download, Eye, Save } from "lucide-react";
 import { type ParsedDocument, type DocumentNode } from "@/lib/types";
+import { parseDocument } from "@/lib/documentParser";
 
 interface DocumentViewerProps {
   document: ParsedDocument;
   onReset: () => void;
 }
 
-export default function DocumentViewer({ document: documentData, onReset }: DocumentViewerProps) {
+export default function DocumentViewer({ document: initialDocument, onReset }: DocumentViewerProps) {
+  const [documentData, setDocumentData] = useState<ParsedDocument>(initialDocument);
   const [selectedNodeId, setSelectedNodeId] = useState<string>(documentData.nodes[0]?.id || "");
   const [showSidebar, setShowSidebar] = useState(true);
   const [highlightedFootnoteId, setHighlightedFootnoteId] = useState<string | null>(null);
@@ -19,6 +21,25 @@ export default function DocumentViewer({ document: documentData, onReset }: Docu
   const [rawContent, setRawContent] = useState<string>("");
   const [savedContent, setSavedContent] = useState<string>("");
   const [documentSaved, setDocumentSaved] = useState(false);
+  
+  // Efeito para processar o documento quando for salvo
+  useEffect(() => {
+    if (documentSaved && savedContent) {
+      try {
+        // Reanalisamos o documento salvo para atualizar a visualização
+        const parsedDocument = parseDocument(savedContent);
+        setDocumentData(parsedDocument);
+        
+        // Atualizamos o ID selecionado para o primeiro nó do novo documento
+        if (parsedDocument.nodes.length > 0) {
+          setSelectedNodeId(parsedDocument.nodes[0].id);
+        }
+      } catch (error) {
+        console.error("Erro ao analisar o documento:", error);
+        window.alert("Houve um erro ao processar o documento. Verifique se a formatação está correta.");
+      }
+    }
+  }, [savedContent, documentSaved]);
   
   // Função para converter o documento em texto bruto para edição
   const getDocumentRawText = () => {
