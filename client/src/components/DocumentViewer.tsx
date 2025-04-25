@@ -15,72 +15,69 @@ interface DocumentViewerProps {
   originalContent?: string; // Conteúdo original do documento
 }
 
-// Função personalizada para colorir tags e conteúdo no texto com cores específicas
+// Função personalizada para colorir tags e conteúdo no texto com classes CSS
 const highlightWithColors = (code: string) => {
   let formattedCode = code;
 
-  // Colorir todo o conteúdo entre as tags level, não apenas as tags
+  // Colorir usando classes CSS em vez de estilos inline - isso resolve o problema de seleção
   // Nível 1 - Vermelho
   formattedCode = formattedCode.replace(
     /(\{\{level1\}\})([\s\S]*?)(\{\{-level1\}\})/g, 
-    '<span style="color: #e53935; font-weight: bold;">$1</span><span style="color: #e53935;">$2</span><span style="color: #e53935; font-weight: bold;">$3</span>'
+    '<span class="level1">$1</span><span class="level1-content">$2</span><span class="level1">$3</span>'
   );
   
   // Nível 2 - Laranja
   formattedCode = formattedCode.replace(
     /(\{\{level2\}\})([\s\S]*?)(\{\{-level2\}\})/g, 
-    '<span style="color: #ff9800; font-weight: bold;">$1</span><span style="color: #ff9800;">$2</span><span style="color: #ff9800; font-weight: bold;">$3</span>'
+    '<span class="level2">$1</span><span class="level2-content">$2</span><span class="level2">$3</span>'
   );
   
   // Nível 3 - Azul
   formattedCode = formattedCode.replace(
     /(\{\{level3\}\})([\s\S]*?)(\{\{-level3\}\})/g, 
-    '<span style="color: #2196f3; font-weight: bold;">$1</span><span style="color: #2196f3;">$2</span><span style="color: #2196f3; font-weight: bold;">$3</span>'
+    '<span class="level3">$1</span><span class="level3-content">$2</span><span class="level3">$3</span>'
   );
   
   // Nível 4 - Verde
   formattedCode = formattedCode.replace(
     /(\{\{level4\}\})([\s\S]*?)(\{\{-level4\}\})/g, 
-    '<span style="color: #4caf50; font-weight: bold;">$1</span><span style="color: #4caf50;">$2</span><span style="color: #4caf50; font-weight: bold;">$3</span>'
+    '<span class="level4">$1</span><span class="level4-content">$2</span><span class="level4">$3</span>'
   );
   
   // Nível 5 - Rosa
   formattedCode = formattedCode.replace(
     /(\{\{level5\}\})([\s\S]*?)(\{\{-level5\}\})/g, 
-    '<span style="color: #e91e63; font-weight: bold;">$1</span><span style="color: #e91e63;">$2</span><span style="color: #e91e63; font-weight: bold;">$3</span>'
+    '<span class="level5">$1</span><span class="level5-content">$2</span><span class="level5">$3</span>'
   );
   
   // Nível 6 - Mostarda
   formattedCode = formattedCode.replace(
     /(\{\{level6\}\})([\s\S]*?)(\{\{-level6\}\})/g, 
-    '<span style="color: #b7940e; font-weight: bold;">$1</span><span style="color: #b7940e;">$2</span><span style="color: #b7940e; font-weight: bold;">$3</span>'
+    '<span class="level6">$1</span><span class="level6-content">$2</span><span class="level6">$3</span>'
   );
   
   // Níveis genéricos (7, 8, 9, etc.)
   formattedCode = formattedCode.replace(
     /(\{\{level(\d+)\}\})([\s\S]*?)(\{\{-level\2\}\})/g, 
-    '<span style="color: #1e88e5; font-weight: bold;">$1</span><span style="color: #1e88e5;">$3</span><span style="color: #1e88e5; font-weight: bold;">$4</span>'
+    '<span class="level$2">$1</span><span class="level$2-content">$3</span><span class="level$2">$4</span>'
   );
   
   // Text level com amarelo forte - tanto as tags quanto o conteúdo
   formattedCode = formattedCode.replace(
     /(\{\{text_level\}\})([\s\S]*?)(\{\{-text_level\}\})/g,
-    '<span style="color: #ffd600; font-weight: bold; background-color: rgba(255, 214, 0, 0.2);">$1</span><span style="background-color: rgba(255, 214, 0, 0.2);">$2</span><span style="color: #ffd600; font-weight: bold; background-color: rgba(255, 214, 0, 0.2);">$3</span>'
+    '<span class="text-level">$1</span><span class="text-level-content">$2</span><span class="text-level">$3</span>'
   );
   
   // Footnotes e footnote numbers
   formattedCode = formattedCode.replace(
     /(\{\{footnote(\d+)\}\})([\s\S]*?)(\{\{-footnote\2\}\})/g,
-    '<span style="color: #9c27b0; font-weight: bold;">$1</span><span style="color: #9c27b0;">$3</span><span style="color: #9c27b0; font-weight: bold;">$4</span>'
+    '<span class="footnote">$1</span><span class="footnote-content">$3</span><span class="footnote">$4</span>'
   );
   
   formattedCode = formattedCode.replace(
-    /(\{\{footnotenumber\d+\}\}\d+\{\{-footnotenumber\d+\}\})/g, 
-    (match) => {
-      return match
-          .replace(/(\{\{footnotenumber\d+\}\})/g, '<span style="color: #ff9800; font-weight: bold;">$1</span>')
-          .replace(/(\{\{-footnotenumber\d+\}\})/g, '<span style="color: #ff9800; font-weight: bold;">$1</span>');
-      });
+    /(\{\{footnotenumber(\d+)\}\})(\d+)(\{\{-footnotenumber\2\}\})/g, 
+    '<span class="footnumber">$1</span><span class="footnumber-content">$3</span><span class="footnumber">$4</span>'
+  );
   
   return formattedCode;
 };

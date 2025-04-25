@@ -15,23 +15,45 @@
 /* Estilos personalizados para o documento */
 
 /* Estilos para o editor de texto com tags coloridas */
-.tag-level-span {
-  color: #2563eb; /* Azul para tags de nível */
+.editor-highlight .level1, .editor-highlight .level1-content {
+  color: #e53935 !important; /* Vermelho para level1 */
+}
+
+.editor-highlight .level2, .editor-highlight .level2-content {
+  color: #ff9800 !important; /* Laranja para level2 */
+}
+
+.editor-highlight .level3, .editor-highlight .level3-content {
+  color: #2196f3 !important; /* Azul para level3 */
+}
+
+.editor-highlight .level4, .editor-highlight .level4-content {
+  color: #4caf50 !important; /* Verde para level4 */
+}
+
+.editor-highlight .level5, .editor-highlight .level5-content {
+  color: #e91e63 !important; /* Rosa para level5 */
+}
+
+.editor-highlight .level6, .editor-highlight .level6-content {
+  color: #b7940e !important; /* Mostarda para level6 */
+}
+
+.editor-highlight .text-level {
+  color: #ffd600 !important; /* Amarelo para text_level */
   font-weight: bold;
 }
 
-.tag-text-level-span {
-  color: #16a34a; /* Verde para tags de texto */
-  font-weight: bold;
+.editor-highlight .text-level-content {
+  background-color: rgba(255, 214, 0, 0.1) !important; /* Fundo amarelo claro para texto em text_level */
 }
 
-.tag-footnote-span {
-  color: #db2777; /* Rosa para tags de footnotes */
-  font-weight: bold;
+.editor-highlight .footnote, .editor-highlight .footnote-content {
+  color: #9c27b0 !important; /* Roxo para footnotes */
 }
 
-.tag-footnumber-span {
-  color: #9333ea; /* Roxo para tags de números de footnotes */
+.editor-highlight .footnumber {
+  color: #ff9800 !important; /* Laranja para números de footnotes */
   font-weight: bold;
 }
 
