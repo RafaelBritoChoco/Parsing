@@ -4,12 +4,21 @@ import { ParsedDocument, DocumentNode, Footnote } from "./types";
  * Parse a document with custom tags into a structured format
  */
 export function parseDocument(content: string): ParsedDocument {
+  // Check if content is empty or undefined
+  if (!content) {
+    return {
+      title: "Untitled Document",
+      nodes: [],
+      footnotes: []
+    };
+  }
+
   // Normalize line endings
   const normalizedContent = content.replace(/\r\n/g, "\n");
   
   // Extract document title (level0) if present
   const titleMatch = normalizedContent.match(/{{level0}}(.*?){{-level0}}/s);
-  const documentTitle = titleMatch ? titleMatch[1].trim() : "Untitled Document";
+  const documentTitle = titleMatch && titleMatch[1] ? titleMatch[1].trim() : "Untitled Document";
   
   // Extract all footnotes
   const footnotes: Footnote[] = [];
@@ -18,21 +27,23 @@ export function parseDocument(content: string): ParsedDocument {
   
   let footnoteMatch;
   while ((footnoteMatch = footnoteRegex.exec(normalizedContent)) !== null) {
-    const content = footnoteMatch[1].trim();
-    
-    // Try to extract footnote number from content
-    const numberMatch = content.match(/^(\d+)[\.:\)]\s*(.*)/);
-    if (numberMatch) {
-      footnotes.push({
-        id: numberMatch[1],
-        content: numberMatch[2].trim()
-      });
-    } else {
-      // If no number found, use a placeholder
-      footnotes.push({
-        id: `fn-${footnotes.length + 1}`,
-        content: content
-      });
+    if (footnoteMatch && footnoteMatch[1]) {
+      const footnoteContent = footnoteMatch[1].trim();
+      
+      // Try to extract footnote number from content
+      const numberMatch = footnoteContent.match(/^(\d+)[\.:\)]\s*(.*)/);
+      if (numberMatch && numberMatch[1] && numberMatch[2]) {
+        footnotes.push({
+          id: numberMatch[1],
+          content: numberMatch[2].trim()
+        });
+      } else {
+        // If no number found, use a placeholder
+        footnotes.push({
+          id: `fn-${footnotes.length + 1}`,
+          content: footnoteContent
+        });
+      }
     }
   }
   
@@ -68,20 +79,24 @@ export function parseDocument(content: string): ParsedDocument {
   levelTags.forEach(({ regex, level }) => {
     let match;
     while ((match = regex.exec(normalizedContent)) !== null) {
-      tokens.push({
-        level,
-        content: match[1].trim(),
-        isText: false,
-        start: match.index,
-        end: match.index + match[0].length
-      });
+      if (match && match[1]) { 
+        tokens.push({
+          level,
+          content: match[1].trim(),
+          isText: false,
+          start: match.index,
+          end: match.index + match[0].length
+        });
+      }
     }
   });
   
   // Process text level tags
   const textRegex = /{{text_level}}(.*?){{-text_level}}/gs;
-  let textMatch;
+  let textMatch: RegExpExecArray | null;
   while ((textMatch = textRegex.exec(normalizedContent)) !== null) {
+    if (!textMatch || !textMatch[1]) continue;
+    
     // Further process the text to identify and categorize by level
     const textContent = textMatch[1];
     const lines = textContent.split("\n");
@@ -91,13 +106,15 @@ export function parseDocument(content: string): ParsedDocument {
     let currentTextContent = "";
     
     lines.forEach((line, index) => {
+      if (line === undefined) return;
+      
       // Check if line contains a level tag
       let lineLevel = -1;
       let lineContent = line;
       
       for (const { regex, level } of levelTags) {
         const levelMatch = line.match(regex);
-        if (levelMatch) {
+        if (levelMatch && levelMatch[1]) {
           lineLevel = level;
           lineContent = levelMatch[1].trim();
           break;
@@ -106,7 +123,7 @@ export function parseDocument(content: string): ParsedDocument {
       
       if (lineLevel >= 0) {
         // If we have accumulated text from previous lines, add it
-        if (currentTextContent.trim()) {
+        if (currentTextContent && currentTextContent.trim()) {
           tokens.push({
             level: currentTextLevel >= 0 ? currentTextLevel : 9, // Default to high level
             content: currentTextContent.trim(),
@@ -123,13 +140,13 @@ export function parseDocument(content: string): ParsedDocument {
       } else if (line.trim()) {
         // Continue accumulating text
         currentTextContent += (currentTextContent ? "\n" : "") + line;
-      } else if (currentTextContent.trim()) {
+      } else if (currentTextContent && currentTextContent.trim()) {
         // Empty line and we have content, add a paragraph break
         currentTextContent += "\n\n";
       }
       
       // If this is the last line and we have content, add it
-      if (index === lines.length - 1 && currentTextContent.trim()) {
+      if (index === lines.length - 1 && currentTextContent && currentTextContent.trim()) {
         tokens.push({
           level: currentTextLevel >= 0 ? currentTextLevel : 9, // Default to high level
           content: currentTextContent.trim(),
