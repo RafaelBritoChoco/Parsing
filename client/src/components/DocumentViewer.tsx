@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import DocumentTree from "@/components/DocumentTree";
 import DocumentContent from "@/components/DocumentContent";
 import FootnoteSection from "@/components/FootnoteSection";
 import PdfComparison from "@/components/PdfComparison";
 import PdfViewer from "@/components/PdfViewer";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, X, AlignLeft, Bookmark, Edit, Download, Eye, Save, SplitSquareVertical, Info, Upload } from "lucide-react";
+import { ChevronLeft, X, AlignLeft, Bookmark, Edit, Download, Eye, Save, SplitSquareVertical, Info, Upload, Code } from "lucide-react";
 import { type ParsedDocument, type DocumentNode } from "@/lib/types";
 import { parseDocument } from "@/lib/documentParser";
 import Editor from 'react-simple-code-editor';
@@ -113,6 +114,7 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
   const [comparisonMode, setComparisonMode] = useState(false); // Novo modo de comparação
   const [pdfUrl, setPdfUrl] = useState<string | null>(null); // URL do PDF para comparação
   const [showPdfUpload, setShowPdfUpload] = useState(true); // Controla se mostra o componente de upload ou o visualizador
+  const [, setLocation] = useLocation(); // Hook para navegação
 
   // Efeito para processar o documento quando for salvo ou ao alternar entre modos
   useEffect(() => {
@@ -305,6 +307,9 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
       setDocumentData(parsedDocument);
       setDocumentSaved(true);
 
+      // Salvar no localStorage para compartilhar com a página de scripts
+      localStorage.setItem("currentDocument", rawContent);
+
       // Atualizamos o ID selecionado para o primeiro nó do novo documento
       if (parsedDocument.nodes.length > 0) {
         setSelectedNodeId(parsedDocument.nodes[0].id);
@@ -317,6 +322,22 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
       console.error("Erro ao processar o documento:", error);
       window.alert("Houve um erro ao processar o documento. Verifique se a formatação está correta.");
     }
+  };
+  
+  // Função para navegar para a página de scripts
+  const goToScripts = () => {
+    // Certificar-se de que temos um documento para trabalhar na página de scripts
+    if (rawContent) {
+      localStorage.setItem("currentDocument", rawContent);
+    } else if (savedContent) {
+      localStorage.setItem("currentDocument", savedContent);
+    } else {
+      const currentRawText = getDocumentRawText();
+      localStorage.setItem("currentDocument", currentRawText);
+    }
+    
+    // Navegar para a página de scripts
+    setLocation("/scripts");
   };
 
   const handleDownload = () => {

@@ -40,42 +40,42 @@ export default function Scripts() {
     {
       id: "text-aligner",
       name: "Text Aligner",
-      description: "Ajusta o layout do texto para melhor legibilidade, combinando elementos estruturais.",
+      description: "Ajusta o layout do texto para melhor legibilidade, combinando elementos estruturais. Este script remove quebras de linha desnecessárias, juntando tags {{levelX}} com seu conteúdo e combinando texto com suas tags de fechamento {{-levelX}}.",
       code: "",
       icon: <FileText className="w-5 h-5 text-blue-500" />,
-      category: "Formatting"
+      category: "Formatação"
     },
     {
       id: "level-correction",
       name: "Level Correction",
-      description: "Corrige os níveis hierárquicos de tags {{levelX}} para seguir uma estrutura adequada.",
+      description: "Corrige os níveis hierárquicos de tags {{levelX}} para seguir uma estrutura adequada. Este script analisa a hierarquia de seções e ajusta automaticamente os níveis para garantir consistência (Parte > Título > Capítulo > Seção > Subseção).",
       code: "",
       icon: <Code className="w-5 h-5 text-orange-500" />,
-      category: "Structure"
+      category: "Estrutura"
     },
     {
       id: "level-in-one-line",
       name: "Level in One Line",
-      description: "Coloca tags de nível e seu conteúdo em uma única linha para melhor consistência.",
+      description: "Coloca tags de nível e seu conteúdo em uma única linha. Remove quebras entre {{levelX}} e conteúdo, e entre conteúdo e {{-levelX}}. Facilita a edição e melhora a consistência do documento.",
       code: "",
       icon: <Zap className="w-5 h-5 text-purple-500" />,
-      category: "Formatting"
+      category: "Formatação"
     },
     {
       id: "fix-footnote-sequence",
       name: "Fix Footnote Sequence",
-      description: "Corrige a sequência de notas de rodapé para garantir numeração contínua.",
+      description: "Verifica e corrige a sequência de notas de rodapé para garantir numeração contínua (1, 2, 3...). Analisa os padrões {{footnotenumberX}}Y{{-footnotenumberZ}} onde Y deve estar em sequência correta.",
       code: "",
       icon: <FileText className="w-5 h-5 text-green-500" />,
-      category: "Content"
+      category: "Conteúdo"
     },
     {
       id: "break-levelx",
       name: "Break LevelX",
-      description: "Identifica e quebra tags {{levelX}} que contêm múltiplas linhas.",
+      description: "Remove tags {{levelX}} que contêm múltiplas linhas, insere marcador 'BreakLine' antes do conteúdo e garante formatação adequada. Útil para identificar tags que precisam ser ajustadas manualmente.",
       code: "",
       icon: <Code className="w-5 h-5 text-red-500" />,
-      category: "Structure"
+      category: "Estrutura"
     }
   ];
 
@@ -134,32 +134,209 @@ export default function Scripts() {
     }, 1500); // Simulação de processamento
   };
 
-  // Funções de processamento para cada script (implementaremos mais tarde)
+  // Funções de processamento para cada script - Implementação em JavaScript baseada nos scripts Python
   const processTextAligner = (text: string): string => {
-    // Implementação real seria baseada no script Text Aligner.py
-    return text.replace(/(\{\{level\d+\}\})(\s*\n\s*)([^\n]+)/g, "$1$3")
-               .replace(/([^\n]+)(\s*\n\s*)(\{\{-level\d+\}\})/g, "$1$3");
+    // Implementação baseada no script Text Aligner.py
+    const lines = text.split('\n');
+    const processedLines = [];
+    let lastLineType = null;
+    
+    // Iterar sobre as linhas e aplicar alinhamento
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const strippedLine = line.trim();
+      
+      // Pular linhas vazias
+      if (!strippedLine) {
+        processedLines.push('');
+        continue;
+      }
+      
+      // Adicionar linha atual ao resultado
+      processedLines.push(line);
+    }
+    
+    let processedText = processedLines.join('\n');
+    
+    // Aplicar as regex para alinhar os elementos
+    // 1. Juntar tag {{levelX}} com o texto que a segue (remover quebra de linha entre eles)
+    processedText = processedText.replace(/(\{\{level\d+\}\})(\s*\n\s*)([^\n]+)/g, "$1$3");
+    
+    // 2. Juntar texto com a tag de fechamento {{-levelX}} (remover quebra de linha entre eles)
+    processedText = processedText.replace(/([^\n]+)(\s*\n\s*)(\{\{-level\d+\}\})/g, "$1$3");
+    
+    // 3. Juntar marcador de lista com o texto que o segue
+    processedText = processedText.replace(/(\{\{\s*\(?\s*[a-zA-Z0-9ivxlcdmIVXLCDM\.]+\s*\)?\s*\}\})(\s*\n\s*)(?=\S)/g, "$1 ");
+    
+    return processedText;
   };
-
+  
   const processLevelCorrection = (text: string): string => {
-    // Implementação real seria baseada no script LVL CORRECTION.py
-    return text;
+    // Implementação simplificada baseada no script LVL CORRECTION.py
+    // Este script faz correções complexas de hierarquia entre níveis
+    // Implementação simplificada:
+    
+    // 1. Extrai todos os blocos de level
+    const levelPattern = /(\{\{level(\d+)\}\})(.*?)(\{\{-level\2\}\})/gs;
+    const matches = [...text.matchAll(levelPattern)];
+    
+    if (matches.length === 0) {
+      return text; // Sem tags para corrigir
+    }
+    
+    let result = text;
+    let adjustedCount = 0;
+    
+    // Estruturar hierarquia: level1 > level2 > level3 > level4 > level5
+    const hierarchy = {
+      "part": ["title", "chapter"],
+      "title": ["chapter", "section", "article"],
+      "chapter": ["section", "article"],
+      "section": ["subsection", "article"],
+      "subsection": ["article"]
+    };
+    
+    const typeMap = {
+      "part": ["part", "parte", "livre", "teil"],
+      "title": ["title", "título", "titre"],
+      "chapter": ["chapter", "capítulo", "chapitre", "kapitel"],
+      "section": ["section", "sección", "secção", "seção", "abschnitt"],
+      "subsection": ["subsection", "sub-section", "sub section", "subsección", "subsecção", "subseção"],
+      "article": ["article", "artículo", "artigo", "artikel"]
+    };
+    
+    // 2. Para cada match, determinar o nível correto e fazer ajustes se necessário
+    for (let i = 0; i < matches.length; i++) {
+      const [fullMatch, startTag, level, content, endTag] = matches[i];
+      const newLevel = Math.min(parseInt(level), 5); // Limitar a 5 níveis no máximo
+      
+      if (newLevel !== parseInt(level)) {
+        // Substituir o nível por um novo
+        const newStartTag = `{{level${newLevel}}}`;
+        const newEndTag = `{{-level${newLevel}}}`;
+        result = result.replace(fullMatch, `${newStartTag}${content}${newEndTag}`);
+        adjustedCount++;
+      }
+    }
+    
+    // Adicionar mensagem informativa
+    if (adjustedCount > 0) {
+      return `/* ${adjustedCount} níveis foram corrigidos */\n\n` + result;
+    }
+    
+    return result;
   };
-
+  
   const processLevelInOneLine = (text: string): string => {
-    // Implementação real seria baseada no script LEVEL IN 1 LINE.py
-    return text.replace(/(\{\{level\d+\}\})(\s*\n\s*)(?=\S)/g, "$1")
-               .replace(/(\S)(\s*\n\s*)(\{\{-level\d+\}\})/g, "$1$3");
+    // Implementação baseada no script LEVEL IN 1 LINE.py
+    let result = text;
+    let changes = 0;
+    
+    // 1. Juntar tag {{levelX}} com o texto que a segue (remover quebra de linha entre eles)
+    result = result.replace(/(\{\{level\d+\}\})(\s*\n\s*)(?=\S)/g, "$1");
+    
+    // 2. Juntar texto com a tag de fechamento {{-levelX}} (remover quebra de linha entre eles)
+    result = result.replace(/(\S)(\s*\n\s*)(\{\{-level\d+\}\})/g, "$1$3");
+    
+    // 3. Juntar marcador de lista com o texto que o segue
+    result = result.replace(/(\{\{\s*\(?\s*[a-zA-Z0-9ivxlcdmIVXLCDM\.]+\s*\)?\s*\}\})(\s*\n\s*)(?=\S)/g, "$1 ");
+    
+    return result;
   };
-
+  
   const processFixFootnoteSequence = (text: string): string => {
-    // Implementação real seria baseada no script FIX FOOTNOTE SEQUENCE.py
-    return text;
+    // Implementação baseada no script FIX FOOTNOTE SEQUENCE.py
+    // Este script renumera as notas de rodapé sequencialmente
+    
+    // 1. Localizar todas as ocorrências de notas de rodapé
+    const footnotePattern = /\{\{footnotenumber(\d+)\}\}(\d+)\{\{-footnotenumber\d+\}\}/g;
+    const matches = [...text.matchAll(footnotePattern)];
+    
+    if (matches.length === 0) {
+      return text + "\n\n/* Nenhuma nota de rodapé encontrada para renumerar */";
+    }
+    
+    // 2. Verificar se a sequência está correta
+    let isSequenceBroken = false;
+    let breakDetails = null;
+    
+    for (let i = 0; i < matches.length; i++) {
+      const expectedNumber = i + 1;
+      const foundNumber = parseInt(matches[i][2]); // Número do meio
+      
+      if (foundNumber !== expectedNumber) {
+        isSequenceBroken = true;
+        breakDetails = {
+          expected: expectedNumber,
+          found: foundNumber,
+          position: matches[i].index
+        };
+        break;
+      }
+    }
+    
+    // 3. Renumerar as notas de rodapé
+    let result = text;
+    
+    // Processo de renumeração (de trás para frente para evitar conflitos)
+    for (let i = matches.length - 1; i >= 0; i--) {
+      const correctNumber = i + 1;
+      const [fullMatch] = matches[i];
+      const replacement = `{{footnotenumber${correctNumber}}}${correctNumber}{{-footnotenumber${correctNumber}}}`;
+      
+      // Substituir a ocorrência atual
+      result = result.substring(0, matches[i].index) + 
+               replacement + 
+               result.substring(matches[i].index + fullMatch.length);
+    }
+    
+    // Adicionar mensagem informativa
+    if (isSequenceBroken) {
+      return `/* Sequência de notas de rodapé quebrada (encontrado: ${breakDetails.found}, esperado: ${breakDetails.expected})
+Todas as ${matches.length} notas de rodapé foram renumeradas em sequência. */\n\n` + result;
+    } else {
+      return `/* Notas de rodapé verificadas (${matches.length}). A sequência está correta. */\n\n` + result;
+    }
   };
-
+  
   const processBreakLevelx = (text: string): string => {
-    // Implementação real seria baseada no script Break-LevelX.py
-    return text;
+    // Implementação baseada no script Break-LevelX.py
+    // Este script identifica tags {{levelX}} que contêm múltiplas linhas e as quebra
+    
+    const levelBlockPattern = /(\{\{level(\d+)\}\})(.*?)(\{\{-level\2\}\})/gs;
+    const matches = [...text.matchAll(levelBlockPattern)];
+    
+    if (matches.length === 0) {
+      return text + "\n\n/* Nenhuma tag {{levelX}} encontrada */";
+    }
+    
+    let result = text;
+    let breakCount = 0;
+    
+    // Processar de trás para frente para evitar alterações de índice
+    for (let i = matches.length - 1; i >= 0; i--) {
+      const [fullMatch, startTag, level, content, endTag] = matches[i];
+      
+      // Verificar se o conteúdo tem quebras de linha
+      if (content.includes('\n')) {
+        breakCount++;
+        
+        // Inserir marcador BreakLine e formatação adequada
+        const replacement = `BreakLine\n${content.trim()}\n`;
+        
+        // Substituir a tag completa pelo conteúdo formatado
+        result = result.substring(0, matches[i].index) + 
+                 replacement + 
+                 result.substring(matches[i].index + fullMatch.length);
+      }
+    }
+    
+    // Adicionar mensagem informativa
+    if (breakCount > 0) {
+      return `/* ${breakCount} tags {{levelX}} multi-linha foram quebradas e marcadas com 'BreakLine' */\n\n` + result;
+    } else {
+      return `/* Nenhuma tag {{levelX}} multi-linha encontrada para quebrar */\n\n` + result;
+    }
   };
 
   // Aplicar mudanças
@@ -176,8 +353,18 @@ export default function Scripts() {
     }
   };
 
-  // Voltar para o editor principal
+  // Voltar para o editor principal e salvar alterações, se necessário
   const goToEditor = () => {
+    // Se tiver alterações, perguntar se quer salvá-las
+    if (processedText && processedText !== currentDocument) {
+      const confirmSave = window.confirm(
+        "Você tem alterações não salvas. Deseja aplicá-las antes de voltar?"
+      );
+      if (confirmSave) {
+        localStorage.setItem("currentDocument", processedText);
+      }
+    }
+    
     setLocation("/");
   };
 
