@@ -53,17 +53,30 @@ export function useTextLevel(
       // Verifica se o conteúdo do nó está nos trechos de text_level
       let isInTextLevel = false;
       
-      for (const textLevelContent of textLevelMatches) {
-        // Verifica se o conteúdo exato do nó está no trecho de text_level
-        if (textLevelContent.includes(nodeContent)) {
-          isInTextLevel = true;
-          break;
-        }
-        
-        // Ou verifica se uma tag completa com esse conteúdo está no trecho de text_level
-        if (levelTagPattern.test(textLevelContent)) {
-          isInTextLevel = true;
-          break;
+      // Primeiro, verificamos se estamos lidando com um nó de nível 0 (documento inteiro)
+      // Se for nível 0, não aplicamos o fundo amarelo a todo o documento
+      if (node.level === 0) {
+        isInTextLevel = false;
+      } else {
+        for (const textLevelContent of textLevelMatches) {
+          // Verifica mais estritamente se o conteúdo do nó está no trecho de text_level
+          // 1. O texto completo deve estar contido num bloco text_level
+          // 2. Para nós com children, verificamos se a tag de abertura está presente
+          
+          const levelOpenTag = `{{level${node.level}}}${nodeContent}`;
+          const isOpen = textLevelContent.includes(levelOpenTag);
+          
+          // Busca mais precisa para evitar falsos positivos
+          if (nodeContent.length > 5 && textLevelContent.includes(nodeContent) && (isOpen || node.children.length === 0)) {
+            isInTextLevel = true;
+            break;
+          }
+          
+          // Ou verifica se uma tag completa com esse conteúdo está no trecho de text_level
+          if (levelTagPattern.test(textLevelContent)) {
+            isInTextLevel = true;
+            break;
+          }
         }
       }
       

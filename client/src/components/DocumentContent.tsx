@@ -165,7 +165,8 @@ export default function DocumentContent({ nodes, onFootnoteClick, rawContent }: 
         <div>
           {nodes.map(node => {
             // Se o nó for marcado como isText: true, inTextLevel: true ou identificado pelo hook como parte de text_level
-            const isTextLevelNode = node.isText || node.inTextLevel || textLevelNodesMap[node.id] === true;
+            // Verificamos apenas se este nó específico está dentro de text_level, não a lei inteira
+            const isTextLevelNode = textLevelNodesMap[node.id] === true;
             
             if (isTextLevelNode) {
               return (
