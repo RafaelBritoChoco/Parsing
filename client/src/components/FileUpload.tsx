@@ -133,7 +133,11 @@ export default function FileUpload({ onDocumentParsed }: FileUploadProps) {
       <Card className="w-full max-w-md mx-auto shadow-lg border-0">
         <CardContent className="pt-6">
           <div className="flex flex-col items-center mb-6">
-            <div className="text-center h-10 mb-2 font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent text-xl">Digital Policy Alert</div>
+            <img 
+              src="/src/assets/dpa-logo.png" 
+              alt="Digital Policy Alert" 
+              className="h-12 mb-4"
+            />
             <h2 className="text-2xl font-semibold text-center text-[color:hsl(var(--primary))]">
               Parsing Check
             </h2>
