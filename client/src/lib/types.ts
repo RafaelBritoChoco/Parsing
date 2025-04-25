@@ -3,6 +3,7 @@ export interface DocumentNode {
   level: number;
   content: string;
   isText: boolean;
+  inTextLevel?: boolean; // Novo atributo para identificar se está dentro de {{text_level}}
   children: DocumentNode[];
 }
 

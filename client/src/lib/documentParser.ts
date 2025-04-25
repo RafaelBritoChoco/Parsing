@@ -98,6 +98,7 @@ export function parseDocument(content: string): ParsedDocument {
     isText: boolean;
     start: number;
     end: number;
+    inTextLevel?: boolean; // Indica se o token está dentro de um {{text_level}}
   }
   
   // Definir os padrões de nível
@@ -143,6 +144,21 @@ export function parseDocument(content: string): ParsedDocument {
   const nestedLevelRegex = /{{text_level}}([\s\S]*?){{-text_level}}/g;
   let nestedLevelMatch: RegExpExecArray | null;
   
+  // Primeiro, vamos coletar as posições de todos os blocos {{text_level}}
+  const textLevelBlocks: Array<{start: number; end: number; content: string}> = [];
+  while ((nestedLevelMatch = nestedLevelRegex.exec(normalizedContent)) !== null) {
+    if (!nestedLevelMatch || !nestedLevelMatch[1]) continue;
+    
+    textLevelBlocks.push({
+      start: nestedLevelMatch.index,
+      end: nestedLevelMatch.index + nestedLevelMatch[0].length,
+      content: nestedLevelMatch[1]
+    });
+  }
+  
+  // Reiniciamos a execução do regex (reset do lastIndex)
+  nestedLevelRegex.lastIndex = 0;
+  
   while ((nestedLevelMatch = nestedLevelRegex.exec(normalizedContent)) !== null) {
     if (!nestedLevelMatch || !nestedLevelMatch[1]) continue;
     
@@ -161,6 +177,7 @@ export function parseDocument(content: string): ParsedDocument {
             level,
             content: innerMatch[1].trim(),
             isText: false,
+            inTextLevel: true, // Marcamos que este nó está dentro de um text_level
             start: nestedLevelMatch.index + innerMatch.index,
             end: nestedLevelMatch.index + innerMatch.index + innerMatch[0].length
           });
@@ -282,6 +299,7 @@ export function parseDocument(content: string): ParsedDocument {
         level: token.level,
         content: token.content,
         isText: token.isText,
+        inTextLevel: token.inTextLevel || false, // Preserva a propriedade inTextLevel
         children: []
       };
       

@@ -116,9 +116,9 @@ export default function DocumentContent({ nodes, onFootnoteClick, rawContent }: 
         />
       );
     } else {
-      // Usa a flag passada pelo componente pai para identificar se está dentro de {{text_level}}
+      // Verifica se o nó tem a propriedade inTextLevel ou se usa a flag passada pelo pai
       // Este valor é passado recursivamente para todas as renderizações de nós filhos
-      const isInTextLevel = isInsideTextLevel;
+      const isInTextLevel = node.inTextLevel || isInsideTextLevel;
       
       // Definir o estilo com base em text_level, mas não aplicaremos o fundo aqui
       // porque já é feito pelo TextLevelWrapper quando necessário
@@ -170,8 +170,8 @@ export default function DocumentContent({ nodes, onFootnoteClick, rawContent }: 
       ) : (
         <div>
           {nodes.map(node => {
-            // Se o nó for marcado como isText: true ou identificado pelo hook como parte de text_level
-            const isTextLevelNode = node.isText || textLevelNodesMap[node.id] === true;
+            // Se o nó for marcado como isText: true, inTextLevel: true ou identificado pelo hook como parte de text_level
+            const isTextLevelNode = node.isText || node.inTextLevel || textLevelNodesMap[node.id] === true;
             
             if (isTextLevelNode) {
               return (
