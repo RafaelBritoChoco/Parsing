@@ -229,15 +229,79 @@ export function parseDocument(content: string): ParsedDocument {
   // Sort tokens by their position in the document
   tokens.sort((a, b) => a.start - b.start);
   
+  // Remover duplicatas antes de construir a árvore
+  const removeDuplicates = () => {
+    // Primeiro ordenamos os tokens por posição
+    tokens.sort((a, b) => a.start - b.start);
+    
+    // Em seguida, remover entradas duplicadas (mesmo conteúdo e nível)
+    const uniqueTokens: Token[] = [];
+    const contentMap = new Map<string, boolean>();
+    
+    // Esta estrutura armazena a distância mínima para considerar dois tokens com o mesmo conteúdo
+    // como sendo efetivamente distintos em vez de duplicatas
+    const MIN_DISTANCE = 200; // Se dois tokens iguais estiverem a menos de 200 caracteres um do outro, consideramos duplicata
+    
+    // Primeiro passo: agrupar tokens por conteúdo e nível
+    const tokenGroups: {[key: string]: Token[]} = {};
+    
+    tokens.forEach(token => {
+      // Cria uma chave única baseada no nível e conteúdo
+      const key = `${token.level}:${token.content}`;
+      
+      if (!tokenGroups[key]) {
+        tokenGroups[key] = [];
+      }
+      
+      tokenGroups[key].push(token);
+    });
+    
+    // Segundo passo: para cada grupo, selecionar apenas tokens que estão suficientemente distantes
+    for (const key in tokenGroups) {
+      const group = tokenGroups[key];
+      
+      if (group.length === 1) {
+        // Se só há um token no grupo, não há duplicata
+        uniqueTokens.push(group[0]);
+      } else {
+        // Ordena por posição
+        group.sort((a, b) => a.start - b.start);
+        
+        // Adiciona o primeiro token
+        let lastAdded = group[0];
+        uniqueTokens.push(lastAdded);
+        
+        // Para os demais, verificar a distância
+        for (let i = 1; i < group.length; i++) {
+          const current = group[i];
+          
+          // Se estiver longe o suficiente do último adicionado, não é duplicata
+          if (current.start - lastAdded.start > MIN_DISTANCE) {
+            uniqueTokens.push(current);
+            lastAdded = current;
+          }
+        }
+      }
+    }
+    
+    // Reclassificar por posição para manter a ordem original
+    uniqueTokens.sort((a, b) => a.start - b.start);
+    
+    return uniqueTokens;
+  };
+  
+  // Ordenar tokens e remover duplicatas
+  const uniqueTokens = removeDuplicates();
+
   // Build the hierarchical tree
   const buildTree = (): DocumentNode[] => {
-    if (tokens.length === 0) return [];
+    if (uniqueTokens.length === 0) return [];
     
     // Create root nodes (level 0) or use a placeholder
     const rootNodes: DocumentNode[] = [];
     let currentLevelNodes: DocumentNode[][] = [[]]; // Array of node lists for each level
     
-    tokens.forEach((token, index) => {
+    uniqueTokens.forEach((token, index) => {
       const node: DocumentNode = {
         id: `node-${index}`,
         level: token.level,

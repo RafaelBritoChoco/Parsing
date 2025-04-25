@@ -12,13 +12,13 @@ export default function DocumentContent({ nodes, onFootnoteClick }: DocumentCont
       // Processa referências de notas de rodapé no formato {{footnotenumberN}}N{{-footnotenumberN}}
       const footnoteRegex = /{{footnotenumber(\d+)}}(\d+){{-footnotenumber\1}}/g;
       let processedContent = content.replace(footnoteRegex, (_, id, number) => {
-        return `<span class="footnote-ref" data-footnote-id="${id}">${number}</span>`;
+        return `<a href="#footnote-${id}" class="footnote-ref" data-footnote-id="${id}">${number}</a>`;
       });
       
       // Compatibilidade com o formato antigo
       const oldFootnoteRegex = /{{footnotenumber}}(.*?){{-footnotenumber}}/g;
       processedContent = processedContent.replace(oldFootnoteRegex, (_, number) => {
-        return `<span class="footnote-ref" data-footnote-id="${number}">${number}</span>`;
+        return `<a href="#footnote-${number}" class="footnote-ref" data-footnote-id="${number}">${number}</a>`;
       });
       
       return processedContent;

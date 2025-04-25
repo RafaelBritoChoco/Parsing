@@ -14,17 +14,24 @@
   color: white;
   background-color: #6366f1;
   border-radius: 50%;
-  width: 1.2rem;
-  height: 1.2rem;
-  vertical-align: text-top;
+  width: 1.5rem;
+  height: 1.5rem;
+  vertical-align: super;
   margin: 0 0.15rem;
   cursor: pointer;
+  text-decoration: none !important;
   transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .footnote-ref:hover {
   background-color: #4f46e5;
   transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.footnote-ref:active {
+  transform: scale(0.95);
 }
 
 /* Destaque para footnotes ativos */
