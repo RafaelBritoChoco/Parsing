@@ -99,12 +99,27 @@ export default function DocumentViewer({ document: initialDocument, onReset }: D
   };
   
   const handleSave = () => {
-    // Salva o conteúdo atual para ser usado no modo de visualização
-    setSavedContent(rawContent);
-    setDocumentSaved(true);
-    
-    // Opcional: pode-se mostrar uma mensagem para o usuário confirmando o salvamento
-    window.alert("Documento salvo com sucesso. Você pode visualizá-lo clicando em 'Preview'.");
+    try {
+      // Tenta processar o documento para ver se a sintaxe está correta
+      const parsedDocument = parseDocument(rawContent);
+      
+      // Se chegou aqui, o documento é válido
+      setSavedContent(rawContent);
+      setDocumentData(parsedDocument);
+      setDocumentSaved(true);
+      
+      // Atualizamos o ID selecionado para o primeiro nó do novo documento
+      if (parsedDocument.nodes.length > 0) {
+        setSelectedNodeId(parsedDocument.nodes[0].id);
+      }
+      
+      // Mensagem para o usuário confirmando o salvamento
+      window.alert("Documento salvo com sucesso. Você pode visualizá-lo clicando em 'Preview'.");
+    } catch (error) {
+      // Se houver um erro no processamento, notificar o usuário
+      console.error("Erro ao processar o documento:", error);
+      window.alert("Houve um erro ao processar o documento. Verifique se a formatação está correta.");
+    }
   };
   
   const handleDownload = () => {

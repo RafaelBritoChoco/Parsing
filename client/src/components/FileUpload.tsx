@@ -70,9 +70,15 @@ export default function FileUpload({ onDocumentParsed }: FileUploadProps) {
     <div className="flex flex-col items-center justify-center w-full h-full p-6">
       <Card className="w-full max-w-md mx-auto">
         <CardContent className="pt-6">
-          <h2 className="text-2xl font-semibold text-center mb-6 text-[color:hsl(var(--primary))]">
-            Upload Your Document
-          </h2>
+          <div className="flex flex-col items-center mb-6">
+            <div className="text-center h-10 mb-2 font-bold text-primary text-lg">Digital Policy Alert</div>
+            <h2 className="text-2xl font-semibold text-center text-[color:hsl(var(--primary))]">
+              Parsing Check
+            </h2>
+            <p className="text-sm text-center mt-1 text-gray-600">
+              Developed by: André Puntel, Artur Dias and Rafael Brito
+            </p>
+          </div>
           
           <div 
             className={`mb-6 border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
@@ -113,32 +119,18 @@ export default function FileUpload({ onDocumentParsed }: FileUploadProps) {
           </div>
           
           <div className="text-sm mt-4">
-            <p className="font-medium">Supported format:</p>
-            <ul className="list-disc list-inside mt-1">
-              <li>Parsed TXT files with level and text markings</li>
+            <p className="font-medium">Steps:</p>
+            <ol className="list-decimal list-inside mt-1 space-y-2">
               <li>
-                Format: 
-                <code className="bg-[color:hsl(var(--muted))] px-1 py-0.5 rounded text-xs font-mono mx-1">
-                  {'{{levelX}}...{{-levelX}}'}
-                </code>
+                <span className="font-medium">Upload your parsed TXT</span>
               </li>
               <li>
-                Text content: 
-                <code className="bg-[color:hsl(var(--muted))] px-1 py-0.5 rounded text-xs font-mono mx-1">
-                  {'{{text_level}}...{{-text_level}}'}
-                </code>
+                <span className="font-medium">Check for mistakes and errors</span>
               </li>
               <li>
-                Footnotes: 
-                <code className="bg-[color:hsl(var(--muted))] px-1 py-0.5 rounded text-xs font-mono mx-1">
-                  {'{{footnote}}...{{-footnote}}'}
-                </code>
-                and
-                <code className="bg-[color:hsl(var(--muted))] px-1 py-0.5 rounded text-xs font-mono mx-1">
-                  {'{{footnotenumber}}...{{-footnotenumber}}'}
-                </code>
+                <span className="font-medium">Correct at Edit Mode, save and Download your file corrected</span>
               </li>
-            </ul>
+            </ol>
           </div>
         </CardContent>
       </Card>
