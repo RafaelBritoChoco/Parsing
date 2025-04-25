@@ -92,7 +92,7 @@ export function parseDocument(content: string): ParsedDocument {
   });
   
   // Pré-processamento: procura tags de nível dentro de text_level
-  // Isso é necessário porque no seu formato, os níveis 3, 4, etc. estão dentro de text_level
+  // Isso é necessário porque no seu formato, os níveis 2, 3, 4, etc. estão dentro de text_level
   const nestedLevelRegex = /{{text_level}}([\s\S]*?){{-text_level}}/g;
   let nestedLevelMatch: RegExpExecArray | null;
   
@@ -103,7 +103,7 @@ export function parseDocument(content: string): ParsedDocument {
     
     // Procura por tags de nível dentro do conteúdo text_level
     for (const { regex, level } of levelTags) {
-      if (level < 3) continue; // Processa apenas level3 e superiores, que geralmente estão dentro de text_level
+      if (level < 2) continue; // Agora processa level2 (preâmbulo) e superiores
       
       const levelRegexInner = new RegExp(`{{level${level}}}(.*?){{-level${level}}}`, 'gs');
       let innerMatch: RegExpExecArray | null;
@@ -135,7 +135,7 @@ export function parseDocument(content: string): ParsedDocument {
     // Precisamos ignorar os trechos com tags de nível que já processamos
     let shouldProcessAsText = true;
     for (const { level } of levelTags) {
-      if (level < 3) continue; // Só verificamos level3 e superiores
+      if (level < 2) continue; // Agora verificamos a partir do level2 (preâmbulo)
       
       const levelRegexCheck = new RegExp(`{{level${level}}}.*?{{-level${level}}}`, 'gs');
       if (levelRegexCheck.test(textContent)) {
