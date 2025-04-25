@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Estilos custom para TextLevel */
+.text-level-wrapper {
+  background-color: #FFEB98 !important;
+  border: 1px solid #FFD700 !important;
+  position: relative;
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+  box-shadow: 0 2px 4px rgba(255, 215, 0, 0.2) !important;
+}
+
 /* Estilos personalizados para o documento */
 
 /* Estilos para o editor de texto com tags coloridas */

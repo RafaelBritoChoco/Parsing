@@ -214,6 +214,7 @@ export function parseDocument(content: string): ParsedDocument {
       level: 9, // Alto nível para texto não estruturado
       content: textContent.trim(),
       isText: true,
+      inTextLevel: true, // Marcar explicitamente que está dentro de text_level
       start: textMatch.index,
       end: textMatch.index + textMatch[0].length
     });

@@ -74,8 +74,9 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
             result += buildRawText(node.children, depth + 1);
           }
         } else if (node.isText) {
-          // For text nodes, maintain the text_level tags exactly as in the original
-          result += `{{text_level}}\n${node.content}\n{{-text_level}}\n\n`;
+          // For text nodes, maintain the text_level tags with proper spacing
+          // Add line break before and after the text_level tags
+          result += `\n{{text_level}}\n\n${node.content}\n\n{{-text_level}}\n\n`;
         } else {
           result += `${node.content}\n\n`;
         }
