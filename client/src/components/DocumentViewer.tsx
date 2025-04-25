@@ -17,16 +17,9 @@ interface DocumentViewerProps {
 
 // Função personalizada para colorir tags no texto com cores específicas
 const highlightWithColors = (code: string) => {
-  // Primeiro, vamos adicionar quebras de linhas em pontos específicos
-  let formattedCode = code
-    // Garantindo quebra de linha após cada tag de abertura
-    .replace(/(\{\{level\d+\}\}[^\n])/g, '$1\n')
-    .replace(/(\{\{text_level\}\}[^\n])/g, '$1\n')
-    .replace(/(\{\{footnote\d+\}\}[^\n])/g, '$1\n')
-    // Garantindo quebra de linha antes de cada tag de fechamento
-    .replace(/([^\n]\{\{-level\d+\}\})/g, '\n$1')
-    .replace(/([^\n]\{\{-text_level\}\})/g, '\n$1')
-    .replace(/([^\n]\{\{-footnote\d+\}\})/g, '\n$1');
+  // Não vamos modificar o texto durante o highlighting
+  // As quebras de linha serão tratadas na função getDocumentRawText
+  let formattedCode = code;
 
   // Agora aplicamos as cores específicas
   return formattedCode
@@ -105,8 +98,8 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
           // Este é um nó dentro de text_level mas não estamos dentro de um bloco text_level ainda
           // Vamos coletar todos os nós inTextLevel e colocá-los dentro de um único bloco text_level
           hasTextLevelContent = true;
-          // Formatação com quebra de linha após as tags de nível
-          textLevelContent += `{{level${node.level}}}\n${node.content}\n{{-level${node.level}}}\n`;
+          // Formatação correta: quebra linha antes do {{levelx}} mas não no {{-levelx}}
+          textLevelContent += `\n{{level${node.level}}}${node.content}{{-level${node.level}}}`;
           
           // Processar filhos, se houver, dentro do mesmo text_level
           if (node.children.length > 0) {
@@ -115,8 +108,8 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
         }
         // Para nós regulares (fora de text_level)
         else if (!node.isText && !node.inTextLevel) {
-          // Formatação com quebra de linha após as tags de nível
-          result += `{{level${node.level}}}\n${node.content}\n{{-level${node.level}}}\n\n`;
+          // Formatação correta: quebra de linha antes do {{levelx}}
+          result += `\n{{level${node.level}}}${node.content}{{-level${node.level}}}\n`;
 
           // Processar filhos, se houver
           if (node.children.length > 0) {
@@ -125,13 +118,13 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
         } 
         // Para nós de texto regular (text_level direto)
         else if (node.isText) {
-          // Para nós de texto, garantimos quebras de linha após a tag de abertura e antes da tag de fechamento
-          result += `{{text_level}}\n${node.content}\n{{-text_level}}\n\n`;
+          // Quebra após {{text_level}} e antes de {{-text_level}}
+          result += `\n{{text_level}}\n${node.content}\n{{-text_level}}\n`;
         }
         // Nós dentro de um text_level já aberto
         else if (isInTextLevel) {
-          // Garantindo quebras de linha apropriadas
-          result += `{{level${node.level}}}\n${node.content}\n{{-level${node.level}}}\n\n`;
+          // Formatação correta: quebra linha antes do {{levelx}} mas não no {{-levelx}}
+          result += `\n{{level${node.level}}}${node.content}{{-level${node.level}}}`;
           
           // Processar filhos, se houver, dentro do mesmo text_level
           if (node.children.length > 0) {
@@ -143,7 +136,7 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
       // Se coletamos conteúdo de text_level, adicionamos ele com as tags apropriadas
       // Formatação exata conforme solicitado pelo usuário
       if (hasTextLevelContent) {
-        result += `{{text_level}}\n${textLevelContent}{{-text_level}}\n\n`;
+        result += `\n{{text_level}}\n${textLevelContent}\n{{-text_level}}\n`;
       }
 
       return result;
@@ -154,8 +147,8 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
       let result = "\n\n";
 
       for (const footnote of documentData.footnotes) {
-        // Garantindo quebras de linha apropriadas para footnotes
-        result += `{{footnote${footnote.id}}}\n${footnote.content}\n{{-footnote${footnote.id}}}\n\n`;
+        // Quebras de linha antes de {{footnote}} mas não antes de {{-footnote}}
+        result += `\n{{footnote${footnote.id}}}\n${footnote.content}{{-footnote${footnote.id}}}\n`;
       }
 
       return result;
