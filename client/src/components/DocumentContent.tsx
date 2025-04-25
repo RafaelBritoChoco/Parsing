@@ -89,14 +89,11 @@ export default function DocumentContent({ nodes, onFootnoteClick }: DocumentCont
     };
 
     if (node.isText) {
+      // Todo nó com isText=true é considerado dentro de text_level
       return (
         <div 
           key={node.id}
-          className={`mb-2 ${
-            isInsideTextLevel 
-              ? 'text-sm text-gray-800 bg-yellow-50 px-3 py-2 rounded border-l-4 border-yellow-200' // Marca-texto amarelo para conteúdo dentro de text_level, tamanho reduzido
-              : 'text-sm font-semibold bg-gray-50 px-3 py-2 rounded shadow-sm' // Fundo cinza sutil para conteúdo fora de text_level, tamanho reduzido
-          }`}
+          className="mb-2 text-sm text-gray-800 px-3 py-2 rounded shadow-sm"
           dangerouslySetInnerHTML={{ 
             __html: processFootnoteRefs(node.content) 
           }}
@@ -119,10 +116,11 @@ export default function DocumentContent({ nodes, onFootnoteClick }: DocumentCont
       // Este valor é passado recursivamente para todas as renderizações de nós filhos
       const isInTextLevel = isInsideTextLevel;
       
-      // Definir o estilo com base em text_level - fundo amarelo para dentro de text_level
+      // Definir o estilo com base em text_level, mas não aplicaremos o fundo aqui
+      // porque já é feito pelo TextLevelWrapper quando necessário
       const headingStyle = isInTextLevel 
-        ? "py-2 px-3 bg-yellow-50 rounded border-l-4 border-yellow-200 mb-2" // Fundo amarelo para conteúdo dentro de text_level 
-        : "py-3 px-4 bg-gray-50 rounded shadow-sm mb-2"; // Fundo cinza para conteúdo fora de text_level
+        ? "py-2 px-3 mb-1.5" // Sem fundo amarelo aqui (já aplicado pelo wrapper)
+        : "py-2 px-3 bg-gray-50 rounded shadow-sm mb-1.5"; // Fundo cinza para conteúdo fora de text_level
       
       const processedHeadingContent = node.content.includes("FOOTNOTE") || 
         node.content.includes("{{footnotenumber") ? 
@@ -150,13 +148,32 @@ export default function DocumentContent({ nodes, onFootnoteClick }: DocumentCont
           </h2>
           
           <div className={isInTextLevel 
-            ? "pl-3 py-1 mt-1 bg-yellow-50 rounded border-l-4 border-yellow-200" // Fundo amarelo para conteúdo dentro de text_level
+            ? "pl-3 py-1 mt-1" // Não adicionamos fundo amarelo aqui, pois já vem do wrapper
             : "px-2 py-1 mt-1"}>
             {node.children.map(child => renderContent(child, false, isInTextLevel))}
           </div>
         </section>
       );
     }
+  };
+
+  // Verifica se devemos envolver o conteúdo em um TextLevelWrapper
+  const hasTextLevelParent = (id: string): boolean => {
+    // Se o nó tiver a flag isText === true, isso indica que ele está dentro de text_level
+    const findNode = (searchNodes: DocumentNode[]): boolean => {
+      for (const node of searchNodes) {
+        if (node.id === id) {
+          return node.isText; // Nós do tipo text são sempre parte de text_level
+        }
+        if (node.children.length > 0) {
+          const found = findNode(node.children);
+          if (found) return true;
+        }
+      }
+      return false;
+    };
+    
+    return findNode(nodes);
   };
 
   return (
@@ -167,7 +184,20 @@ export default function DocumentContent({ nodes, onFootnoteClick }: DocumentCont
         </div>
       ) : (
         <div>
-          {nodes.map(node => renderContent(node, true))}
+          {nodes.map(node => {
+            // Verifica se o nó inteiro deve ter fundo amarelo (dentro de text_level)
+            const shouldHaveYellowBackground = node.isText || hasTextLevelParent(node.id);
+            
+            if (shouldHaveYellowBackground) {
+              return (
+                <TextLevelWrapper key={node.id}>
+                  {renderContent(node, true, true)}
+                </TextLevelWrapper>
+              );
+            }
+            
+            return renderContent(node, true);
+          })}
         </div>
       )}
     </div>

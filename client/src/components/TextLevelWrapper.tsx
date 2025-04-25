@@ -9,7 +9,7 @@ interface TextLevelWrapperProps {
  */
 export default function TextLevelWrapper({ children }: TextLevelWrapperProps) {
   return (
-    <div className="bg-yellow-50 p-3 rounded-md border-l-4 border-yellow-200 my-2 overflow-hidden">
+    <div className="bg-yellow-200/70 py-1 px-2 rounded-md my-1 overflow-hidden">
       {children}
     </div>
   );
