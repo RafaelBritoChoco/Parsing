@@ -54,17 +54,11 @@ export default function DocumentContent({ nodes, onFootnoteClick, rawContent }: 
 
     const getHeadingSize = (level: number, isTextLevel: boolean = false): string => {
       if (isTextLevel) {
-        // Dentro de text_level (como preâmbulo), fontes ainda menores
-        switch (level) {
-          case 0: return "text-base font-medium mb-1"; // Reduzido significativamente
-          case 1: return "text-sm font-medium mb-1"; // Reduzido significativamente
-          case 2: return "text-sm font-medium mb-0.5"; // Reduzido significativamente
-          case 3: return "text-xs font-medium mb-0.5"; // Reduzido significativamente
-          case 4: return "text-xs font-medium mb-0.5"; // Mantido xs
-          default: return "text-xs font-normal mb-0"; // Espaçamento mínimo
-        }
+        // Dentro de text_level TODOS OS NÍVEIS têm o mesmo tamanho de fonte
+        // Apenas vamos manter a formatação em negrito para as hierarquias
+        return "text-sm font-medium mb-0.5"; // Tamanho único para TODOS os níveis dentro de text_level
       } else {
-        // Fora de text_level, também reduzidos mas mantendo hierarquia
+        // Fora de text_level, mantemos a hierarquia de tamanhos
         switch (level) {
           case 0: return "text-xl font-bold mb-2"; // Reduzido de 3xl para xl
           case 1: return "text-lg font-bold mb-1.5"; // Reduzido de 2xl para lg
@@ -123,8 +117,8 @@ export default function DocumentContent({ nodes, onFootnoteClick, rawContent }: 
       // Definir o estilo com base em text_level, mas não aplicaremos o fundo aqui
       // porque já é feito pelo TextLevelWrapper quando necessário
       const headingStyle = isInTextLevel 
-        ? "py-2 px-3 mb-1.5" // Sem fundo amarelo aqui (já aplicado pelo wrapper)
-        : "py-2 px-3 bg-gray-200 rounded shadow-sm mb-1.5"; // Fundo cinza MAIS ESCURO para conteúdo fora de text_level
+        ? "py-1 px-3 mb-1" // Espaçamento reduzido para dentro de text_level
+        : "py-1.5 px-3 bg-gray-200 rounded shadow-sm mb-1"; // Espaçamento reduzido para fora de text_level
       
       const processedHeadingContent = node.content.includes("FOOTNOTE") || 
         node.content.includes("{{footnotenumber") ? 

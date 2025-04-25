@@ -91,7 +91,8 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
         // Para nós de texto regular (text_level direto)
         else if (node.isText) {
           // Para nós de texto, mantemos as tags text_level com espaçamento adequado
-          result += `\n{{text_level}}\n\n${node.content}\n\n{{-text_level}}\n\n`;
+          // Uma quebra antes de {{text_level}}, duas quebras depois, e uma quebra antes de {{-text_level}}
+          result += `\n{{text_level}}\n\n${node.content}\n{{-text_level}}\n\n`;
         }
         // Nós dentro de um text_level já aberto
         else if (isInTextLevel) {
@@ -105,8 +106,9 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
       }
 
       // Se coletamos conteúdo de text_level, adicionamos ele com as tags apropriadas
+      // Garantindo quebras de linha antes e depois de {{text_level}} e {{-text_level}}
       if (hasTextLevelContent) {
-        result += `\n{{text_level}}\n\n${textLevelContent}{{-text_level}}\n\n`;
+        result += `\n{{text_level}}\n\n${textLevelContent}\n{{-text_level}}\n\n`;
       }
 
       return result;
