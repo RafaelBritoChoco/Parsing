@@ -4,6 +4,37 @@
 
 /* Estilos personalizados para o documento */
 
+/* Estilos para o editor de texto com tags coloridas */
+.tag-level-span {
+  color: #2563eb; /* Azul para tags de nível */
+  font-weight: bold;
+}
+
+.tag-text-level-span {
+  color: #16a34a; /* Verde para tags de texto */
+  font-weight: bold;
+}
+
+.tag-footnote-span {
+  color: #db2777; /* Rosa para tags de footnotes */
+  font-weight: bold;
+}
+
+.tag-footnumber-span {
+  color: #9333ea; /* Roxo para tags de números de footnotes */
+  font-weight: bold;
+}
+
+/* Editor de código personalizado */
+.editor-wrapper {
+  font-family: 'Fira Code', 'Fira Mono', monospace;
+}
+
+.editor-wrapper div, .editor-wrapper textarea {
+  outline: none;
+  font-family: 'Fira Code', 'Fira Mono', monospace !important;
+}
+
 /* Estilização de footnotes */
 .footnote-ref {
   display: inline-flex;
