@@ -10,27 +10,37 @@ export default function DocumentContent({ nodes, onFootnoteClick }: DocumentCont
     // Process content to render footnote references
     const processFootnoteRefs = (content: string) => {
       // Primeiro, processa nossos marcadores especiais (FOOTNOTE_N_N)
+      // Adicionamos um id único para cada aparência da nota de rodapé, para poder referenciar de volta
       const specialMarkerRegex = /\(FOOTNOTE_(\d+)_(\d+)\)/g;
+      let footnoteRefCount = 0;
       let processedContent = content.replace(specialMarkerRegex, (_, id, number) => {
-        return `<a href="#footnote-${id}" class="footnote-ref-circle" data-footnote-id="${id}">(${number})</a>`;
+        footnoteRefCount++;
+        const refId = `footnote-ref-${id}-${footnoteRefCount}`;
+        return `<a href="#footnote-${id}" id="${refId}" class="footnote-ref-circle" data-footnote-id="${id}" data-ref-id="${refId}">(${number})</a>`;
       });
       
       // Compatibilidade com outros formatos anteriores por segurança
       processedContent = processedContent.replace(/FOOTNOTE_REF_(\d+)_(\d+)/g, (_, id, number) => {
-        return `<a href="#footnote-${id}" class="footnote-ref-circle" data-footnote-id="${id}">(${number})</a>`;
+        footnoteRefCount++;
+        const refId = `footnote-ref-${id}-${footnoteRefCount}`;
+        return `<a href="#footnote-${id}" id="${refId}" class="footnote-ref-circle" data-footnote-id="${id}" data-ref-id="${refId}">(${number})</a>`;
       });
 
       // Processa referências de notas de rodapé no formato {{footnotenumberN}}N{{-footnotenumberN}}
       // Importante: este é um backup caso o processamento anterior não tenha feito a substituição
       const footnoteRegex = /{{footnotenumber(\d+)}}(\d+){{-footnotenumber\1}}/g;
       processedContent = processedContent.replace(footnoteRegex, (_, id, number) => {
-        return `<a href="#footnote-${id}" class="footnote-ref-circle" data-footnote-id="${id}">(${number})</a>`;
+        footnoteRefCount++;
+        const refId = `footnote-ref-${id}-${footnoteRefCount}`;
+        return `<a href="#footnote-${id}" id="${refId}" class="footnote-ref-circle" data-footnote-id="${id}" data-ref-id="${refId}">(${number})</a>`;
       });
       
       // Compatibilidade com o formato antigo
       const oldFootnoteRegex = /{{footnotenumber}}(.*?){{-footnotenumber}}/g;
       processedContent = processedContent.replace(oldFootnoteRegex, (_, number) => {
-        return `<a href="#footnote-${number}" class="footnote-ref-circle" data-footnote-id="${number}">(${number})</a>`;
+        footnoteRefCount++;
+        const refId = `footnote-ref-${number}-${footnoteRefCount}`;
+        return `<a href="#footnote-${number}" id="${refId}" class="footnote-ref-circle" data-footnote-id="${number}" data-ref-id="${refId}">(${number})</a>`;
       });
       
       return processedContent;

@@ -27,6 +27,46 @@ export default function FootnoteSection({ footnotes, highlightedFootnoteId }: Fo
     
     return colorMapping[id] || { bg: "bg-gray-100", border: "border-gray-500", text: "text-gray-700" };
   };
+  
+  // Função para rolar de volta para a referência da nota de rodapé
+  const scrollToFootnoteRef = (footnoteId: string) => {
+    // Primeiro, tentamos encontrar a primeira referência a esta nota no documento
+    // usando o padrão de ID que criamos (footnote-ref-ID-X)
+    const possibleRefs = Array.from(
+      window.document.querySelectorAll(`[id^='footnote-ref-${footnoteId}-']`)
+    );
+    
+    if (possibleRefs.length > 0) {
+      // Vamos para a primeira ocorrência
+      const firstRef = possibleRefs[0] as HTMLElement;
+      firstRef.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      
+      // Destacamos visualmente
+      firstRef.classList.add('footnote-ref-highlight');
+      
+      // Remover o destaque após um tempo
+      setTimeout(() => {
+        firstRef.classList.remove('footnote-ref-highlight');
+      }, 3000);
+      
+      return;
+    }
+    
+    // Fallback para links mais antigos sem o formato específico
+    const oldRefs = Array.from(
+      window.document.querySelectorAll(`[data-footnote-id='${footnoteId}']`)
+    );
+    
+    if (oldRefs.length > 0) {
+      const firstRef = oldRefs[0] as HTMLElement;
+      firstRef.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      
+      firstRef.classList.add('footnote-ref-highlight');
+      setTimeout(() => {
+        firstRef.classList.remove('footnote-ref-highlight');
+      }, 3000);
+    }
+  };
 
   return (
     <section className="mt-8 pt-6 border-t-2 border-gray-300 p-6 bg-gray-50 rounded-lg shadow-sm">
@@ -45,11 +85,13 @@ export default function FootnoteSection({ footnotes, highlightedFootnoteId }: Fo
             <div 
               key={footnote.id}
               id={`footnote-${footnote.id}`}
-              className={`p-4 rounded-md border-l-4 ${colors.border} ${
+              className={`p-4 rounded-md border-l-4 ${colors.border} cursor-pointer ${
                 isHighlighted 
                   ? `${colors.bg} shadow-md transform scale-[1.02] transition-all duration-500` 
-                  : 'bg-white shadow-sm transition-all duration-300'
+                  : 'bg-white hover:bg-gray-50 shadow-sm transition-all duration-300'
               }`}
+              onClick={() => scrollToFootnoteRef(footnote.id)}
+              title="Clique para voltar à referência no texto"
             >
               <div className="flex items-start gap-3">
                 <div className={`footnote-ref-circle flex-shrink-0 mt-0.5 
