@@ -403,3 +403,71 @@ pre {
 .tag-text-level { @apply bg-orange-100 text-orange-800 font-semibold px-1 rounded; }
 .tag-footnote { @apply bg-teal-100 text-teal-800 font-semibold px-1 rounded; }
 .tag-footnumber { @apply bg-cyan-100 text-cyan-800 font-semibold px-1 rounded; }
+
+/* Estilos específicos para o editor com cores definidas pelo usuário */
+.editor-wrapper {
+  position: relative;
+  line-height: 1.5;
+}
+
+.editor-textarea {
+  caret-color: #2563eb !important;
+  outline: none !important;
+  line-height: 1.5 !important;
+}
+
+.editor-wrapper div, 
+.editor-wrapper textarea {
+  white-space: pre-wrap !important;
+  overflow-wrap: break-word !important;
+}
+
+/* Cores específicas para os níveis no editor */
+[style*="color: #e53935"] { /* level1 - vermelho */
+  background-color: rgba(229, 57, 53, 0.05);
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+[style*="color: #ff9800"] { /* level2 - laranja */
+  background-color: rgba(255, 152, 0, 0.05);
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+[style*="color: #2196f3"] { /* level3 - azul */
+  background-color: rgba(33, 150, 243, 0.05);
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+[style*="color: #4caf50"] { /* level4 - verde */
+  background-color: rgba(76, 175, 80, 0.05);
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+[style*="color: #e91e63"] { /* level5 - rosa */
+  background-color: rgba(233, 30, 99, 0.05);
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+[style*="color: #b7940e"] { /* level6 - mostarda */
+  background-color: rgba(183, 148, 14, 0.05);
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+[style*="color: #ffd600"] { /* text_level - amarelo */
+  background-color: rgba(255, 214, 0, 0.2) !important;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-weight: bold;
+}
+
+[style*="color: #9c27b0"] { /* footnote - roxo */
+  background-color: rgba(156, 39, 176, 0.05);
+  padding: 2px 4px;
+  border-radius: 3px;
+}
