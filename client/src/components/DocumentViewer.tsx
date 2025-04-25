@@ -3,7 +3,7 @@ import DocumentTree from "@/components/DocumentTree";
 import DocumentContent from "@/components/DocumentContent";
 import FootnoteSection from "@/components/FootnoteSection";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, X, AlignLeft, Bookmark, Edit, Download, Eye } from "lucide-react";
+import { ChevronLeft, X, AlignLeft, Bookmark, Edit, Download, Eye, Save } from "lucide-react";
 import { type ParsedDocument, type DocumentNode } from "@/lib/types";
 
 interface DocumentViewerProps {
@@ -17,6 +17,8 @@ export default function DocumentViewer({ document: documentData, onReset }: Docu
   const [highlightedFootnoteId, setHighlightedFootnoteId] = useState<string | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [rawContent, setRawContent] = useState<string>("");
+  const [savedContent, setSavedContent] = useState<string>("");
+  const [documentSaved, setDocumentSaved] = useState(false);
   
   // Função para converter o documento em texto bruto para edição
   const getDocumentRawText = () => {
@@ -25,9 +27,9 @@ export default function DocumentViewer({ document: documentData, onReset }: Docu
       let result = "";
       
       for (const node of nodes) {
-        // Adiciona as tags de nível e o conteúdo
+        // Adiciona as tags de nível e o conteúdo - com quebra de linha dupla após cada tag de nível
         if (!node.isText) {
-          result += `{{level${node.level}}}${node.content}{{-level${node.level}}}\n`;
+          result += `{{level${node.level}}}${node.content}{{-level${node.level}}}\n\n`;
           // Processa recursivamente os filhos
           if (node.children.length > 0) {
             result += buildRawText(node.children, depth + 1);
@@ -35,9 +37,9 @@ export default function DocumentViewer({ document: documentData, onReset }: Docu
         } else {
           // Para nós de texto, apenas adicionamos o conteúdo bruto
           if (node.level > 0) {
-            result += `{{text_level}}${node.content}{{-text_level}}\n`;
+            result += `{{text_level}}${node.content}{{-text_level}}\n\n`;
           } else {
-            result += `${node.content}\n`;
+            result += `${node.content}\n\n`;
           }
         }
       }
@@ -65,8 +67,23 @@ export default function DocumentViewer({ document: documentData, onReset }: Docu
       // Entrando no modo de edição
       const rawText = getDocumentRawText();
       setRawContent(rawText);
+      setSavedContent(rawText);
+      setDocumentSaved(true);
+    } else if (documentSaved) {
+      // Voltando para o modo de visualização com alterações salvas
+      // Se houver conteúdo salvo, utilizamos ele
+      setRawContent(savedContent);
     }
     setEditMode(!editMode);
+  };
+  
+  const handleSave = () => {
+    // Salva o conteúdo atual para ser usado no modo de visualização
+    setSavedContent(rawContent);
+    setDocumentSaved(true);
+    
+    // Opcional: pode-se mostrar uma mensagem para o usuário confirmando o salvamento
+    window.alert("Documento salvo com sucesso. Você pode visualizá-lo clicando em 'Preview'.");
   };
   
   const handleDownload = () => {
@@ -240,15 +257,26 @@ export default function DocumentViewer({ document: documentData, onReset }: Docu
             </Button>
             
             {editMode && (
-              <Button 
-                variant="default"
-                size="sm"
-                onClick={handleDownload}
-                className="gap-1"
-              >
-                <Download className="h-4 w-4" />
-                <span>Download</span>
-              </Button>
+              <>
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSave}
+                  className="gap-1"
+                >
+                  <Save className="h-4 w-4" />
+                  <span>Salvar</span>
+                </Button>
+                <Button 
+                  variant="default"
+                  size="sm"
+                  onClick={handleDownload}
+                  className="gap-1"
+                >
+                  <Download className="h-4 w-4" />
+                  <span>Download</span>
+                </Button>
+              </>
             )}
           </div>
         </div>
@@ -268,7 +296,8 @@ export default function DocumentViewer({ document: documentData, onReset }: Docu
                 <li>Use <code className="bg-gray-100 px-1 rounded">{'{{text_level}}...{{-text_level}}'}</code> for content inside sections</li>
                 <li>Use <code className="bg-gray-100 px-1 rounded">{'{{footnotenumberX}}X{{-footnotenumberX}}'}</code> for footnote references</li>
                 <li>Use <code className="bg-gray-100 px-1 rounded">{'{{footnoteX}}...{{-footnoteX}}'}</code> to define footnotes</li>
-                <li>Download your edited document by clicking the button above</li>
+                <li>Clique em <strong>Salvar</strong> para salvar o documento antes de visualizá-lo</li>
+                <li>Use o botão <strong>Download</strong> para baixar o documento editado</li>
               </ul>
             </div>
           </div>
