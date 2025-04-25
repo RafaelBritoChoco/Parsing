@@ -157,25 +157,6 @@ export default function DocumentContent({ nodes, onFootnoteClick }: DocumentCont
     }
   };
 
-  // Verifica se devemos envolver o conteúdo em um TextLevelWrapper
-  const hasTextLevelParent = (id: string): boolean => {
-    // Se o nó tiver a flag isText === true, isso indica que ele está dentro de text_level
-    const findNode = (searchNodes: DocumentNode[]): boolean => {
-      for (const node of searchNodes) {
-        if (node.id === id) {
-          return node.isText; // Nós do tipo text são sempre parte de text_level
-        }
-        if (node.children.length > 0) {
-          const found = findNode(node.children);
-          if (found) return true;
-        }
-      }
-      return false;
-    };
-    
-    return findNode(nodes);
-  };
-
   return (
     <div className="p-4 flex-1">
       {nodes.length === 0 ? (
@@ -185,18 +166,16 @@ export default function DocumentContent({ nodes, onFootnoteClick }: DocumentCont
       ) : (
         <div>
           {nodes.map(node => {
-            // Verifica se o nó inteiro deve ter fundo amarelo (dentro de text_level)
-            const shouldHaveYellowBackground = node.isText || hasTextLevelParent(node.id);
-            
-            if (shouldHaveYellowBackground) {
+            // Se o nó for marcado como isText: true, ele está dentro de {{text_level}}
+            if (node.isText) {
               return (
                 <TextLevelWrapper key={node.id}>
                   {renderContent(node, true, true)}
                 </TextLevelWrapper>
               );
+            } else {
+              return renderContent(node, true, false);
             }
-            
-            return renderContent(node, true);
           })}
         </div>
       )}
