@@ -36,7 +36,7 @@ export default function DocumentViewer({ document: initialDocument, onReset }: D
   const [rawContent, setRawContent] = useState<string>("");
   const [savedContent, setSavedContent] = useState<string>("");
   const [documentSaved, setDocumentSaved] = useState(false);
-  
+
   // Efeito para processar o documento quando for salvo
   useEffect(() => {
     if (documentSaved && savedContent) {
@@ -44,7 +44,7 @@ export default function DocumentViewer({ document: initialDocument, onReset }: D
         // Reanalisamos o documento salvo para atualizar a visualização
         const parsedDocument = parseDocument(savedContent);
         setDocumentData(parsedDocument);
-        
+
         // Atualizamos o ID selecionado para o primeiro nó do novo documento
         if (parsedDocument.nodes.length > 0) {
           setSelectedNodeId(parsedDocument.nodes[0].id);
@@ -55,56 +55,44 @@ export default function DocumentViewer({ document: initialDocument, onReset }: D
       }
     }
   }, [savedContent, documentSaved]);
-  
+
   // Função para converter o documento em texto bruto para edição
   const getDocumentRawText = () => {
     // Uma função recursiva para reconstruir o documento
     const buildRawText = (nodes: DocumentNode[], depth = 0): string => {
       let result = "";
-      
+
       for (const node of nodes) {
         // Adiciona as tags de nível e o conteúdo - com quebra de linha dupla após cada tag de nível
         if (!node.isText) {
           result += `{{level${node.level}}}${node.content}{{-level${node.level}}}\n\n`;
-          
-          // Verificar se temos nós level3 e envolver com text_level 
-          if (node.level === 2 && node.children.some(child => !child.isText && child.level === 3)) {
-            // Adicione as tags text_level
-            result += `{{text_level}}\n`;
-            // Processa recursivamente os filhos
-            if (node.children.length > 0) {
-              result += buildRawText(node.children, depth + 1);
-            }
-            result += `{{-text_level}}\n\n`;
-          } else if (node.children.length > 0) {
-            // Processa recursivamente os filhos (caso não seja level2 com level3 dentro)
+
+          // Process children if they exist
+          if (node.children.length > 0) {
             result += buildRawText(node.children, depth + 1);
           }
+        } else if (node.isText) {
+          // For text nodes, maintain the text_level tags exactly as in the original
+          result += `{{text_level}}\n${node.content}\n{{-text_level}}\n\n`;
         } else {
-          // Para nós de texto, sempre exibimos as tags de text_level
-          if (node.level > 0) {
-            // Garantimos que todas as tags {{text_level}} estejam visíveis e claramente marcadas
-            result += `{{text_level}}\n${node.content}\n{{-text_level}}\n\n`;
-          } else {
-            result += `${node.content}\n\n`;
-          }
+          result += `${node.content}\n\n`;
         }
       }
-      
+
       return result;
     };
-    
+
     // Adiciona as notas de rodapé no final
     const buildFootnotes = (): string => {
       let result = "\n\n";
-      
+
       for (const footnote of documentData.footnotes) {
         result += `{{footnote${footnote.id}}}\n${footnote.content}\n{{-footnote${footnote.id}}}\n\n`;
       }
-      
+
       return result;
     };
-    
+
     const rawText = buildRawText(documentData.nodes) + buildFootnotes();
     return rawText;
   };
@@ -123,22 +111,22 @@ export default function DocumentViewer({ document: initialDocument, onReset }: D
     }
     setEditMode(!editMode);
   };
-  
+
   const handleSave = () => {
     try {
       // Tenta processar o documento para ver se a sintaxe está correta
       const parsedDocument = parseDocument(rawContent);
-      
+
       // Se chegou aqui, o documento é válido
       setSavedContent(rawContent);
       setDocumentData(parsedDocument);
       setDocumentSaved(true);
-      
+
       // Atualizamos o ID selecionado para o primeiro nó do novo documento
       if (parsedDocument.nodes.length > 0) {
         setSelectedNodeId(parsedDocument.nodes[0].id);
       }
-      
+
       // Mensagem para o usuário confirmando o salvamento
       window.alert("Documento salvo com sucesso. Você pode visualizá-lo clicando em 'Preview'.");
     } catch (error) {
@@ -147,24 +135,24 @@ export default function DocumentViewer({ document: initialDocument, onReset }: D
       window.alert("Houve um erro ao processar o documento. Verifique se a formatação está correta.");
     }
   };
-  
+
   const handleDownload = () => {
     // Cria um blob com o conteúdo bruto
     const blob = new Blob([rawContent], { type: 'text/plain' });
-    
+
     // Cria um URL temporário para o download
     const url = URL.createObjectURL(blob);
-    
+
     // Cria um elemento de âncora para o download
     const a = window.document.createElement('a');
     a.href = url;
     // Usa o título do documento ParsedDocument ou um nome padrão
     a.download = documentData.title ? `${documentData.title}.txt` : 'document.txt';
-    
+
     // Adiciona o elemento ao documento, clica nele e o remove
     window.document.body.appendChild(a);
     a.click();
-    
+
     // Limpa o URL e remove o elemento
     setTimeout(() => {
       window.document.body.removeChild(a);
@@ -182,16 +170,16 @@ export default function DocumentViewer({ document: initialDocument, onReset }: D
 
   const handleFootnoteClick = (footnoteId: string) => {
     setHighlightedFootnoteId(footnoteId);
-    
+
     // Scroll to footnote - Usando window.document para garantir que estamos acessando o DOM do navegador
     setTimeout(() => {
       const footnoteElement = window.document.getElementById(`footnote-${footnoteId}`);
       if (footnoteElement) {
         footnoteElement.scrollIntoView({ behavior: "smooth", block: "center" });
-        
+
         // Adicionar um destaque temporário ao elemento
         footnoteElement.classList.add("footnote-highlight-animation");
-        
+
         // Remover o destaque após animação
         setTimeout(() => {
           footnoteElement.classList.remove("footnote-highlight-animation");
@@ -204,12 +192,12 @@ export default function DocumentViewer({ document: initialDocument, onReset }: D
   // Filter out nodes relevant to the current selection for display
   const getContentNodes = (): DocumentNode[] => {
     if (!selectedNodeId) return [];
-    
+
     // Find the selected node
     const findNode = (nodes: DocumentNode[], id: string): DocumentNode | null => {
       for (const node of nodes) {
         if (node.id === id) return node;
-        
+
         if (node.children.length > 0) {
           const found = findNode(node.children, id);
           if (found) return found;
@@ -217,15 +205,15 @@ export default function DocumentViewer({ document: initialDocument, onReset }: D
       }
       return null;
     };
-    
+
     const selectedNode = findNode(documentData.nodes, selectedNodeId);
     if (!selectedNode) return [];
-    
+
     // For level0 (document title), show the full document
     if (selectedNode.level === 0) {
       return documentData.nodes;
     }
-    
+
     // Otherwise, show the node and its children
     return [selectedNode];
   };
@@ -241,7 +229,7 @@ export default function DocumentViewer({ document: initialDocument, onReset }: D
           <AlignLeft className="h-5 w-5 text-[color:hsl(var(--primary))]" />
         </button>
       )}
-      
+
       {/* Sidebar Navigation */}
       <div 
         className={`${
@@ -282,7 +270,7 @@ export default function DocumentViewer({ document: initialDocument, onReset }: D
             </Button>
           </div>
         </div>
-        
+
         <div className="flex-1 overflow-y-auto p-2">
           <DocumentTree 
             nodes={documentData.nodes} 
@@ -291,7 +279,7 @@ export default function DocumentViewer({ document: initialDocument, onReset }: D
             collapsed={sidebarCollapsed}
           />
         </div>
-        
+
         {documentData.footnotes.length > 0 && (
           <div className="p-4 border-t border-[color:hsl(var(--muted))]">
             <div className="flex items-center gap-2 text-sm font-medium mb-2">
@@ -333,7 +321,7 @@ export default function DocumentViewer({ document: initialDocument, onReset }: D
                 </>
               )}
             </Button>
-            
+
             {editMode && (
               <>
                 <Button 
@@ -358,7 +346,7 @@ export default function DocumentViewer({ document: initialDocument, onReset }: D
             )}
           </div>
         </div>
-      
+
         {editMode ? (
           <div className="p-6 flex-1 flex flex-col">
             <div className="editor-wrapper flex-1 font-mono text-sm border border-gray-200 rounded-lg min-h-[400px] focus-within:ring-2 focus-within:ring-blue-500 shadow-inner bg-gray-50 overflow-auto">
@@ -430,7 +418,7 @@ export default function DocumentViewer({ document: initialDocument, onReset }: D
               nodes={getContentNodes()}
               onFootnoteClick={handleFootnoteClick}
             />
-            
+
             {documentData.footnotes.length > 0 && (
               <FootnoteSection 
                 footnotes={documentData.footnotes} 
