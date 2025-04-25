@@ -142,7 +142,7 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
         
         // Agora processamos os nós de text_level como um grupo
         if (textLevelNodes.length > 0) {
-          // Tag de abertura do text_level na sua própria linha com espaço
+          // Tag de abertura do text_level SEMPRE sozinha em sua própria linha
           result += `\n\n{{text_level}}\n\n`;
           
           // Processar cada nó dentro do text_level
@@ -156,7 +156,7 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
             }
           }
           
-          // Tag de fechamento do text_level na sua própria linha com espaço
+          // Tag de fechamento do text_level SEMPRE sozinha em sua própria linha
           result += `{{-text_level}}\n\n`;
         }
       }
