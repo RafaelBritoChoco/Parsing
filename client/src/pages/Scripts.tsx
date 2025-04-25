@@ -1,13 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Code, FileText, Zap } from "lucide-react";
+import { ArrowLeft, Code, FileText, Zap, Upload, Download, FileUp } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 
 // Interface para um script
 interface Script {
@@ -26,6 +28,7 @@ export default function Scripts() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [_, setLocation] = useLocation();
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Verificar se temos um documento no localStorage
   useEffect(() => {
@@ -34,6 +37,78 @@ export default function Scripts() {
       setCurrentDocument(savedDocument);
     }
   }, []);
+  
+  // Função para lidar com upload direto de arquivo
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    
+    // Verificar se é um arquivo TXT
+    if (!file.name.toLowerCase().endsWith('.txt')) {
+      toast({
+        title: "Formato inválido",
+        description: "Por favor, carregue apenas arquivos TXT.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target?.result as string;
+      if (content) {
+        setCurrentDocument(content);
+        localStorage.setItem("currentDocument", content);
+        
+        toast({
+          title: "Documento carregado",
+          description: `Arquivo "${file.name}" carregado com sucesso.`,
+          variant: "default"
+        });
+      }
+    };
+    
+    reader.readAsText(file);
+  };
+  
+  // Função para trigger do input de arquivo
+  const triggerFileUpload = () => {
+    fileInputRef.current?.click();
+  };
+  
+  // Função para baixar o documento processado
+  const downloadDocument = () => {
+    const textToDownload = processedText || currentDocument;
+    if (!textToDownload) {
+      toast({
+        title: "Nenhum documento para baixar",
+        description: "Não há documento disponível para download.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Criar blob e link para download
+    const blob = new Blob([textToDownload], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = "documento_processado.txt";
+    document.body.appendChild(a);
+    a.click();
+    
+    // Limpar
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 100);
+    
+    toast({
+      title: "Download concluído",
+      description: "O documento foi baixado com sucesso.",
+      variant: "default"
+    });
+  };
 
   // Lista de scripts disponíveis
   const availableScripts: Script[] = [
@@ -384,11 +459,43 @@ Todas as ${matches.length} notas de rodapé foram renumeradas em sequência. */\
           </Button>
           <h1 className="text-xl font-semibold text-gray-800">Scripts para Processamento de Texto</h1>
         </div>
-        <div>
+        <div className="flex items-center gap-3">
+          {/* Input de arquivo oculto */}
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            className="hidden" 
+            accept=".txt" 
+            onChange={handleFileUpload} 
+          />
+          
+          {/* Botão para upload de novo documento */}
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={triggerFileUpload} 
+            className="gap-1"
+          >
+            <FileUp className="h-4 w-4" />
+            <span>Nova Lei (TXT)</span>
+          </Button>
+          
+          {/* Botão para download */}
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={downloadDocument} 
+            className="gap-1"
+            disabled={!(processedText || currentDocument)}
+          >
+            <Download className="h-4 w-4" />
+            <span>Baixar Documento</span>
+          </Button>
+          
           <img 
             src="/src/assets/dpa-logo-new.png" 
             alt="Digital Policy Alert" 
-            className="h-8 w-auto"
+            className="h-8 w-auto ml-2"
           />
         </div>
       </header>
@@ -396,8 +503,8 @@ Todas as ${matches.length} notas de rodapé foram renumeradas em sequência. */\
       {/* Main content */}
       <main className="flex-1 p-6">
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Script selection */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {/* Lado esquerdo - Seleção de scripts */}
             <div className="md:col-span-1">
               <Card>
                 <CardHeader>
@@ -446,72 +553,115 @@ Todas as ${matches.length} notas de rodapé foram renumeradas em sequência. */\
                   </Button>
                 </CardFooter>
               </Card>
+              
+              {/* Ajuda sobre os scripts */}
+              <div className="mt-4">
+                <Alert className="bg-amber-50 border-amber-200">
+                  <FileText className="h-4 w-4 text-amber-600" />
+                  <AlertTitle className="text-amber-800">Dica para Documentos</AlertTitle>
+                  <AlertDescription className="text-amber-700 text-xs">
+                    Você pode carregar qualquer documento TXT, mesmo sem formatação específica de níveis. 
+                    Os scripts podem ajudar a preparar seu texto antes de adicionar tags.
+                  </AlertDescription>
+                </Alert>
+              </div>
             </div>
 
-            {/* Text display */}
-            <div className="md:col-span-2">
+            {/* Lado direito - Visualização lado a lado */}
+            <div className="md:col-span-3">
               <Card className="h-full flex flex-col">
-                <CardHeader>
-                  <CardTitle>Documento</CardTitle>
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-center">
+                    <CardTitle>Visualização Lado a Lado</CardTitle>
+                    <div className="flex gap-2">
+                      {processedText && (
+                        <Button 
+                          onClick={applyChanges}
+                          variant="default"
+                          size="sm"
+                        >
+                          Aplicar Alterações
+                        </Button>
+                      )}
+                    </div>
+                  </div>
                   <CardDescription>
-                    {processedText 
-                      ? "Visualize o resultado do processamento abaixo"
-                      : "Carregue um documento na página principal primeiro"}
+                    {currentDocument 
+                      ? "Visualize os documentos original e processado simultaneamente"
+                      : "Carregue um documento para começar"}
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="flex-1 overflow-hidden">
-                  <Tabs defaultValue="original" className="h-full flex flex-col">
-                    <TabsList className="mb-2">
-                      <TabsTrigger value="original">Original</TabsTrigger>
-                      <TabsTrigger value="processed" disabled={!processedText}>Processado</TabsTrigger>
-                    </TabsList>
-                    
-                    <TabsContent value="original" className="flex-1 overflow-hidden">
+                
+                <CardContent className="flex-1 pb-1">
+                  {/* Visualização lado a lado */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-[550px]">
+                    {/* Documento original - Sempre visível */}
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge variant="outline" className="text-blue-600 bg-blue-50 border-blue-200 h-6">
+                          Original
+                        </Badge>
+                      </div>
                       {currentDocument ? (
                         <Textarea 
                           value={currentDocument} 
                           readOnly 
-                          className="h-[500px] font-mono text-sm"
+                          className="h-full font-mono text-sm resize-none"
                         />
                       ) : (
-                        <div className="flex flex-col items-center justify-center h-[500px] bg-gray-50 rounded-md border border-dashed border-gray-300 p-6">
+                        <div className="flex flex-col items-center justify-center h-full bg-gray-50 rounded-md border border-dashed border-gray-300 p-6">
                           <FileText className="h-16 w-16 text-gray-300 mb-4" />
                           <h3 className="text-lg font-medium text-gray-600 mb-2">Nenhum documento carregado</h3>
                           <p className="text-gray-500 text-center mb-4">
-                            Volte à página principal para carregar um documento TXT.
+                            Carregue um documento TXT usando o botão "Nova Lei" acima.
                           </p>
-                          <Button variant="outline" onClick={goToEditor}>
-                            Ir para o Editor
+                          <Button variant="outline" onClick={triggerFileUpload}>
+                            <Upload className="h-4 w-4 mr-2" />
+                            Carregar Documento
                           </Button>
                         </div>
                       )}
-                    </TabsContent>
+                    </div>
                     
-                    <TabsContent value="processed" className="flex-1 overflow-hidden">
+                    {/* Documento processado */}
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge variant="outline" className="text-green-600 bg-green-50 border-green-200 h-6">
+                          Processado
+                        </Badge>
+                        {processedText && (
+                          <span className="text-xs text-gray-500">
+                            • Script aplicado: {currentScript?.name}
+                          </span>
+                        )}
+                      </div>
                       {processedText ? (
                         <Textarea 
                           value={processedText} 
                           readOnly 
-                          className="h-[500px] font-mono text-sm"
+                          className="h-full font-mono text-sm resize-none"
                         />
                       ) : (
-                        <div className="flex flex-col items-center justify-center h-[500px] bg-gray-50 rounded-md border border-dashed border-gray-300">
-                          <p className="text-gray-500">Execute um script para ver o resultado aqui</p>
+                        <div className="flex flex-col items-center justify-center h-full bg-gray-50 rounded-md border border-dashed border-gray-300 p-6">
+                          <Code className="h-16 w-16 text-gray-300 mb-4" />
+                          <h3 className="text-lg font-medium text-gray-600 mb-2">Nenhum processamento realizado</h3>
+                          <p className="text-gray-500 text-center mb-4">
+                            Selecione um script e clique em "Executar Script" para ver o resultado aqui.
+                          </p>
+                          {currentDocument && (
+                            <Button 
+                              variant="outline" 
+                              onClick={executeScript}
+                              disabled={isProcessing}
+                            >
+                              {isProcessing ? "Processando..." : "Executar Script"}
+                            </Button>
+                          )}
                         </div>
                       )}
-                    </TabsContent>
-                  </Tabs>
+                    </div>
+                  </div>
                 </CardContent>
-                <CardFooter className="flex justify-end">
-                  {processedText && (
-                    <Button 
-                      onClick={applyChanges}
-                      variant="default"
-                    >
-                      Aplicar Alterações
-                    </Button>
-                  )}
-                </CardFooter>
               </Card>
             </div>
           </div>
