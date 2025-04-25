@@ -6,17 +6,22 @@ interface DocumentContentProps {
 }
 
 export default function DocumentContent({ nodes, onFootnoteClick }: DocumentContentProps) {
-  const renderContent = (node: DocumentNode, isRoot = false) => {
+  const renderContent = (node: DocumentNode, isRoot = false, isInsideTextLevel = false) => {
     // Process content to render footnote references
     const processFootnoteRefs = (content: string) => {
-      if (!content.includes('{{footnotenumber}}')) return content;
+      // Processa referências de notas de rodapé no formato {{footnotenumberN}}N{{-footnotenumberN}}
+      const footnoteRegex = /{{footnotenumber(\d+)}}(\d+){{-footnotenumber\1}}/g;
+      let processedContent = content.replace(footnoteRegex, (_, id, number) => {
+        return `<span class="footnote-ref" data-footnote-id="${id}">${number}</span>`;
+      });
       
-      let processedContent = content;
-      const footnoteRegex = /{{footnotenumber}}(.*?){{-footnotenumber}}/g;
-      
-      return processedContent.replace(footnoteRegex, (_, number) => {
+      // Compatibilidade com o formato antigo
+      const oldFootnoteRegex = /{{footnotenumber}}(.*?){{-footnotenumber}}/g;
+      processedContent = processedContent.replace(oldFootnoteRegex, (_, number) => {
         return `<span class="footnote-ref" data-footnote-id="${number}">${number}</span>`;
       });
+      
+      return processedContent;
     };
 
     const getHeadingSize = (level: number): string => {
@@ -30,15 +35,27 @@ export default function DocumentContent({ nodes, onFootnoteClick }: DocumentCont
       }
     };
 
+    // Sistema de cores conforme solicitado
     const getLevelColor = (level: number): string => {
-      return `text-[color:hsl(var(--level${level}))]`;
+      switch(level) {
+        case 1: return "text-red-600"; // Vermelho para level1
+        case 2: return "text-orange-500"; // Laranja para level2
+        case 3: return "text-blue-600"; // Azul para level3
+        case 4: return "text-green-600"; // Verde para level4
+        case 5: return "text-purple-600"; // Roxo para level5
+        case 6: return "text-pink-600"; // Rosa para level6
+        case 7: return "text-yellow-600"; // Amarelo para level7
+        case 8: return "text-emerald-600"; // Esmeralda para level8
+        case 9: return "text-cyan-600"; // Ciano para level9
+        default: return "text-gray-800"; // Padrão para level0 ou outros
+      }
     };
 
     if (node.isText) {
       return (
         <div 
           key={node.id}
-          className={`mb-3 text-gray-700`}
+          className={`mb-3 ${isInsideTextLevel ? 'underline decoration-gray-300 underline-offset-4' : ''}`}
           dangerouslySetInnerHTML={{ 
             __html: processFootnoteRefs(node.content) 
           }}
@@ -55,14 +72,19 @@ export default function DocumentContent({ nodes, onFootnoteClick }: DocumentCont
         />
       );
     } else {
+      // Determina se este nó está dentro de text_level
+      // Para fins de demonstração, marcamos que os níveis 2+ geralmente estão dentro de text_level
+      const isInTextLevel = node.level >= 2;
+      
       return (
         <section key={node.id} className={isRoot ? "" : "mb-8"}>
-          <h2 className={`${getHeadingSize(node.level)} ${getLevelColor(node.level)}`}>
+          <h2 className={`${getHeadingSize(node.level)} ${getLevelColor(node.level)} 
+            ${isInTextLevel ? 'underline decoration-gray-300 underline-offset-4' : ''}`}>
             {node.content}
           </h2>
           
           <div className={`level-content level${node.level}-content`}>
-            {node.children.map(child => renderContent(child))}
+            {node.children.map(child => renderContent(child, false, isInTextLevel))}
           </div>
         </section>
       );

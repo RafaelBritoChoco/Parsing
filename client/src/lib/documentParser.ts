@@ -22,9 +22,27 @@ export function parseDocument(content: string): ParsedDocument {
   
   // Extract all footnotes
   const footnotes: Footnote[] = [];
-  const footnoteRegex = /{{footnote}}(.*?){{-footnote}}/gs;
-  const footnoteNumberRegex = /{{footnotenumber}}(.*?){{-footnotenumber}}/g;
   
+  // Procurar por notas de rodapé no formato {{footnoteN}}N{{-footnoteN}}
+  const footnoteFullRegex = /{{footnote(\d+)}}(.*?){{-footnote\1}}/gs;
+  let footnoteFullMatch;
+  while ((footnoteFullMatch = footnoteFullRegex.exec(normalizedContent)) !== null) {
+    if (footnoteFullMatch && footnoteFullMatch[1] && footnoteFullMatch[2]) {
+      const footnoteNumber = footnoteFullMatch[1];
+      const footnoteContent = footnoteFullMatch[2].trim();
+      
+      footnotes.push({
+        id: footnoteNumber,
+        content: footnoteContent
+      });
+    }
+  }
+  
+  // Procurar por referências de notas de rodapé no formato {{footnotenumberN}}N{{-footnotenumberN}}
+  const footnoteNumberRegex = /{{footnotenumber(\d+)}}(\d+){{-footnotenumber\1}}/g;
+  
+  // Para compatibilidade, manter também o formato antigo
+  const footnoteRegex = /{{footnote}}(.*?){{-footnote}}/gs;
   let footnoteMatch;
   while ((footnoteMatch = footnoteRegex.exec(normalizedContent)) !== null) {
     if (footnoteMatch && footnoteMatch[1]) {

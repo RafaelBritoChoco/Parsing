@@ -2,6 +2,82 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Estilos personalizados para o documento */
+
+/* Estilização de footnotes */
+.footnote-ref {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: white;
+  background-color: #6366f1;
+  border-radius: 50%;
+  width: 1.2rem;
+  height: 1.2rem;
+  vertical-align: text-top;
+  margin: 0 0.15rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.footnote-ref:hover {
+  background-color: #4f46e5;
+  transform: scale(1.1);
+}
+
+/* Destaque para footnotes ativos */
+.footnote-highlighted {
+  background-color: #f59e0b;
+}
+
+/* Cores para os diferentes níveis */
+.level1-content {
+  border-left: 2px solid #ef4444;
+  padding-left: 0.75rem;
+}
+
+.level2-content {
+  border-left: 2px solid #f97316;
+  padding-left: 0.75rem;
+}
+
+.level3-content {
+  border-left: 2px solid #2563eb;
+  padding-left: 0.75rem;
+}
+
+.level4-content {
+  border-left: 2px solid #16a34a;
+  padding-left: 0.75rem;
+}
+
+.level5-content {
+  border-left: 2px solid #9333ea;
+  padding-left: 0.75rem;
+}
+
+.level6-content {
+  border-left: 2px solid #db2777;
+  padding-left: 0.75rem;
+}
+
+.level7-content {
+  border-left: 2px solid #ca8a04;
+  padding-left: 0.75rem;
+}
+
+.level8-content {
+  border-left: 2px solid #059669;
+  padding-left: 0.75rem;
+}
+
+.level9-content {
+  border-left: 2px solid #0891b2;
+  padding-left: 0.75rem;
+}
+
 :root {
   --background: 0 0% 100%;
   --foreground: 215 25% 27%;
