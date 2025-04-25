@@ -2,8 +2,10 @@ import { useState, useEffect } from "react";
 import DocumentTree from "@/components/DocumentTree";
 import DocumentContent from "@/components/DocumentContent";
 import FootnoteSection from "@/components/FootnoteSection";
+import PdfComparison from "@/components/PdfComparison";
+import PdfViewer from "@/components/PdfViewer";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, X, AlignLeft, Bookmark, Edit, Download, Eye, Save, SplitSquareVertical, Info } from "lucide-react";
+import { ChevronLeft, X, AlignLeft, Bookmark, Edit, Download, Eye, Save, SplitSquareVertical, Info, Upload } from "lucide-react";
 import { type ParsedDocument, type DocumentNode } from "@/lib/types";
 import { parseDocument } from "@/lib/documentParser";
 import Editor from 'react-simple-code-editor';
@@ -109,6 +111,8 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
   const [documentSaved, setDocumentSaved] = useState(!!originalContent);
   const [hasEdits, setHasEdits] = useState(false); // Rastreia se existem edições não salvas
   const [comparisonMode, setComparisonMode] = useState(false); // Novo modo de comparação
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null); // URL do PDF para comparação
+  const [showPdfUpload, setShowPdfUpload] = useState(true); // Controla se mostra o componente de upload ou o visualizador
 
   // Efeito para processar o documento quando for salvo ou ao alternar entre modos
   useEffect(() => {
@@ -241,8 +245,20 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
       setEditMode(false);
     }
     
+    // Se estamos saindo do modo de comparação, limpar o URL do PDF
+    if (comparisonMode) {
+      setPdfUrl(null);
+      setShowPdfUpload(true);
+    }
+    
     // Alternar o modo de comparação
     setComparisonMode(!comparisonMode);
+  };
+  
+  // Função para lidar com o upload do PDF
+  const handlePdfLoad = (url: string) => {
+    setPdfUrl(url);
+    setShowPdfUpload(false);
   };
 
   const toggleEditMode = () => {
@@ -638,32 +654,51 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
         ) : comparisonMode ? (
           // Modo de comparação - exibe original e processado lado a lado
           <div className="flex-1 flex flex-col md:flex-row">
-            {/* Painel esquerdo - Documento original */}
-            <div 
-              className="w-full md:w-1/2 border-b md:border-b-0 md:border-r border-gray-200 overflow-auto left-panel sync-scroll"
-              onScroll={syncScroll}
-            >
-              <div className="sticky top-0 z-10 bg-gray-50 px-4 py-2 border-b border-gray-200 text-sm font-medium">
-                Original Document
-              </div>
-              <div className="p-4 font-mono text-sm whitespace-pre-wrap original-document-content">
-                {originalContent ? (
-                  <div dangerouslySetInnerHTML={{ 
-                    __html: originalContent
-                      .replace(/\{\{level([0-9])\}\}/g, '<span class="tag-level$1">{{level$1}}</span>')
-                      .replace(/\{\{-level([0-9])\}\}/g, '<span class="tag-level$1">{{-level$1}}</span>')
-                      .replace(/\{\{text_level\}\}/g, '<span class="tag-text-level">{{text_level}}</span>')
-                      .replace(/\{\{-text_level\}\}/g, '<span class="tag-text-level">{{-text_level}}</span>')
-                      .replace(/\{\{footnote([0-9]+)\}\}/g, '<span class="tag-footnote">{{footnote$1}}</span>')
-                      .replace(/\{\{-footnote([0-9]+)\}\}/g, '<span class="tag-footnote">{{-footnote$1}}</span>')
-                      .replace(/\{\{footnotenumber([0-9]+)\}\}/g, '<span class="tag-footnote">{{footnotenumber$1}}</span>')
-                      .replace(/\{\{-footnotenumber([0-9]+)\}\}/g, '<span class="tag-footnote">{{-footnotenumber$1}}</span>')
-                      .replace(/\n/g, '<br>')
-                  }} />
-                ) : (
-                  "No original content available for comparison"
+            {/* Painel esquerdo - Documento original (PDF ou texto) */}
+            <div className="w-full md:w-1/2 border-b md:border-b-0 md:border-r border-gray-200 overflow-auto left-panel">
+              <div className="sticky top-0 z-10 bg-gray-50 px-4 py-2 border-b border-gray-200 text-sm font-medium flex justify-between items-center">
+                <span>Original Document</span>
+                {!showPdfUpload && pdfUrl && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setShowPdfUpload(true)}
+                    className="text-xs"
+                  >
+                    <Upload className="h-3 w-3 mr-1" />
+                    Change Document
+                  </Button>
                 )}
               </div>
+              
+              {showPdfUpload ? (
+                <div className="p-4">
+                  <PdfComparison onPdfLoad={handlePdfLoad} />
+                </div>
+              ) : pdfUrl ? (
+                <div className="p-4">
+                  <PdfViewer pdfUrl={pdfUrl} />
+                </div>
+              ) : (
+                <div className="p-4 font-mono text-sm whitespace-pre-wrap original-document-content">
+                  {originalContent ? (
+                    <div dangerouslySetInnerHTML={{ 
+                      __html: originalContent
+                        .replace(/\{\{level([0-9])\}\}/g, '<span class="tag-level$1">{{level$1}}</span>')
+                        .replace(/\{\{-level([0-9])\}\}/g, '<span class="tag-level$1">{{-level$1}}</span>')
+                        .replace(/\{\{text_level\}\}/g, '<span class="tag-text-level">{{text_level}}</span>')
+                        .replace(/\{\{-text_level\}\}/g, '<span class="tag-text-level">{{-text_level}}</span>')
+                        .replace(/\{\{footnote([0-9]+)\}\}/g, '<span class="tag-footnote">{{footnote$1}}</span>')
+                        .replace(/\{\{-footnote([0-9]+)\}\}/g, '<span class="tag-footnote">{{-footnote$1}}</span>')
+                        .replace(/\{\{footnotenumber([0-9]+)\}\}/g, '<span class="tag-footnote">{{footnotenumber$1}}</span>')
+                        .replace(/\{\{-footnotenumber([0-9]+)\}\}/g, '<span class="tag-footnote">{{-footnotenumber$1}}</span>')
+                        .replace(/\n/g, '<br>')
+                    }} />
+                  ) : (
+                    "No original content available for comparison"
+                  )}
+                </div>
+              )}
             </div>
             
             {/* Painel direito - Documento processado */}
