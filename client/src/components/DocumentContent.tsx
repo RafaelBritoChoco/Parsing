@@ -50,22 +50,22 @@ export default function DocumentContent({ nodes, onFootnoteClick }: DocumentCont
       if (isTextLevel) {
         // Dentro de text_level, sem negrito e com fonte menor
         switch (level) {
-          case 0: return "text-xl font-normal mb-6";
-          case 1: return "text-lg font-normal mb-4";
-          case 2: return "text-base font-normal mb-3";
-          case 3: return "text-sm font-normal mb-2";
-          case 4: return "text-xs font-normal mb-1";
-          default: return "text-xs font-normal mb-1";
+          case 0: return "text-xl font-normal mb-2";
+          case 1: return "text-lg font-normal mb-1.5";
+          case 2: return "text-base font-normal mb-1";
+          case 3: return "text-sm font-normal mb-1";
+          case 4: return "text-xs font-normal mb-0.5";
+          default: return "text-xs font-normal mb-0.5";
         }
       } else {
         // Fora de text_level, com negrito e tamanho normal
         switch (level) {
-          case 0: return "text-2xl font-bold mb-6";
-          case 1: return "text-xl font-bold mb-4";
-          case 2: return "text-lg font-bold mb-3";
-          case 3: return "text-base font-bold mb-2";
-          case 4: return "text-sm font-bold mb-1";
-          default: return "text-xs font-bold mb-1";
+          case 0: return "text-2xl font-bold mb-3";
+          case 1: return "text-xl font-bold mb-2";
+          case 2: return "text-lg font-bold mb-1.5";
+          case 3: return "text-base font-bold mb-1";
+          case 4: return "text-sm font-bold mb-0.5";
+          default: return "text-xs font-bold mb-0.5";
         }
       }
     };
@@ -134,7 +134,7 @@ export default function DocumentContent({ nodes, onFootnoteClick }: DocumentCont
         : <>{node.content}</>;
         
       return (
-        <section key={node.id} className={isRoot ? "" : "mb-8"}>
+        <section key={node.id} className={isRoot ? "" : "mb-3"}>
           <h2 className={`${getHeadingSize(node.level, isInTextLevel)} ${getLevelColor(node.level)} 
             ${isInTextLevel ? 'text-gray-700' : ''}`}>
             {processedHeadingContent}

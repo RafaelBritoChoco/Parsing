@@ -67,44 +67,84 @@
   box-shadow: 0 1px 2px rgba(59, 130, 246, 0.3);
 }
 
-/* Cores diferentes para cada número de nota de rodapé - CORES MAIS VIBRANTES */
-.footnote-ref-circle[data-footnote-id="1"] { 
+/* Cores diferentes para footnotes - Sistema de cores baseado no resto de divisão */
+.footnote-ref-circle[data-footnote-id="1"],
+.footnote-ref-circle[data-footnote-id="11"],
+.footnote-ref-circle[data-footnote-id="21"],
+.footnote-ref-circle[data-footnote-id="31"] { 
   background-color: #ff3b30; /* Vermelho vibrante */
   box-shadow: 0 0 10px rgba(255, 59, 48, 0.6);
 }
-.footnote-ref-circle[data-footnote-id="2"] { 
+
+.footnote-ref-circle[data-footnote-id="2"],
+.footnote-ref-circle[data-footnote-id="12"],
+.footnote-ref-circle[data-footnote-id="22"],
+.footnote-ref-circle[data-footnote-id="32"] { 
   background-color: #ff9500; /* Laranja vibrante */
   box-shadow: 0 0 10px rgba(255, 149, 0, 0.6);
 }
-.footnote-ref-circle[data-footnote-id="3"] { 
+
+.footnote-ref-circle[data-footnote-id="3"],
+.footnote-ref-circle[data-footnote-id="13"],
+.footnote-ref-circle[data-footnote-id="23"],
+.footnote-ref-circle[data-footnote-id="33"] { 
   background-color: #34c759; /* Verde vibrante */
   box-shadow: 0 0 10px rgba(52, 199, 89, 0.6);
 }
-.footnote-ref-circle[data-footnote-id="4"] { 
+
+.footnote-ref-circle[data-footnote-id="4"],
+.footnote-ref-circle[data-footnote-id="14"],
+.footnote-ref-circle[data-footnote-id="24"],
+.footnote-ref-circle[data-footnote-id="34"] { 
   background-color: #00c7be; /* Ciano vibrante */
   box-shadow: 0 0 10px rgba(0, 199, 190, 0.6);
 }
-.footnote-ref-circle[data-footnote-id="5"] { 
+
+.footnote-ref-circle[data-footnote-id="5"],
+.footnote-ref-circle[data-footnote-id="15"],
+.footnote-ref-circle[data-footnote-id="25"],
+.footnote-ref-circle[data-footnote-id="35"] { 
   background-color: #af52de; /* Violeta vibrante */
   box-shadow: 0 0 10px rgba(175, 82, 222, 0.6);
 }
-.footnote-ref-circle[data-footnote-id="6"] { 
+
+.footnote-ref-circle[data-footnote-id="6"],
+.footnote-ref-circle[data-footnote-id="16"],
+.footnote-ref-circle[data-footnote-id="26"],
+.footnote-ref-circle[data-footnote-id="36"] { 
   background-color: #ff2d55; /* Rosa vibrante */
   box-shadow: 0 0 10px rgba(255, 45, 85, 0.6);
 }
-.footnote-ref-circle[data-footnote-id="7"] { 
+
+.footnote-ref-circle[data-footnote-id="7"],
+.footnote-ref-circle[data-footnote-id="17"],
+.footnote-ref-circle[data-footnote-id="27"],
+.footnote-ref-circle[data-footnote-id="37"] { 
   background-color: #ffcc00; /* Amarelo vibrante */
   box-shadow: 0 0 10px rgba(255, 204, 0, 0.6);
 }
-.footnote-ref-circle[data-footnote-id="8"] { 
+
+.footnote-ref-circle[data-footnote-id="8"],
+.footnote-ref-circle[data-footnote-id="18"],
+.footnote-ref-circle[data-footnote-id="28"],
+.footnote-ref-circle[data-footnote-id="38"] { 
   background-color: #00ba7c; /* Esmeralda vibrante */
   box-shadow: 0 0 10px rgba(0, 186, 124, 0.6);
 }
-.footnote-ref-circle[data-footnote-id="9"] { 
+
+.footnote-ref-circle[data-footnote-id="9"],
+.footnote-ref-circle[data-footnote-id="19"],
+.footnote-ref-circle[data-footnote-id="29"],
+.footnote-ref-circle[data-footnote-id="39"] { 
   background-color: #5856d6; /* Índigo vibrante */
   box-shadow: 0 0 10px rgba(88, 86, 214, 0.6);
 }
-.footnote-ref-circle[data-footnote-id="10"] { 
+
+.footnote-ref-circle[data-footnote-id="0"],
+.footnote-ref-circle[data-footnote-id="10"],
+.footnote-ref-circle[data-footnote-id="20"],
+.footnote-ref-circle[data-footnote-id="30"],
+.footnote-ref-circle[data-footnote-id="40"] { 
   background-color: #bf5af2; /* Púrpura vibrante */
   box-shadow: 0 0 10px rgba(191, 90, 242, 0.6);
 }
@@ -155,7 +195,7 @@
 }
 
 .level3-content {
-  border-left: 2px solid #2563eb;
+  border-left: 2px solid #fc7303; /* Laranja mais vibrante */
   padding-left: 0.75rem;
 }
 
@@ -215,7 +255,7 @@
   --level0: 222 83% 33%;
   --level1: 217 91% 54%;
   --level2: 214 94% 61%;
-  --level3: 213 97% 68%;
+  --level3: 25 95% 53%;  /* Laranja mais vibrante */
   --level4: 213 94% 79%;
   --level5: 214 100% 87%;
   --level6: 213 100% 93%;
@@ -288,14 +328,14 @@
   @apply border-l-2 border-transparent mb-2;
 }
 
-/* Espaçamento progressivo para níveis mais aninhados */
+/* Espaçamento progressivo para níveis mais aninhados - reduzido */
 .level0-content { @apply pl-2 border-l-[color:hsl(var(--level0))]; }
-.level1-content { @apply pl-4 border-l-[color:hsl(var(--level1))]; }
-.level2-content { @apply pl-8 border-l-[color:hsl(var(--level2))]; }
-.level3-content { @apply pl-12 border-l-[color:hsl(var(--level3))]; }
-.level4-content { @apply pl-16 border-l-[color:hsl(var(--level4))]; }
-.level5-content { @apply pl-20 border-l-[color:hsl(var(--level5))]; }
-.level6-content { @apply pl-24 border-l-[color:hsl(var(--level6))]; }
+.level1-content { @apply pl-3 border-l-[color:hsl(var(--level1))]; }
+.level2-content { @apply pl-4 border-l-[color:hsl(var(--level2))]; }
+.level3-content { @apply pl-5 border-l-[color:hsl(var(--level3))]; }
+.level4-content { @apply pl-6 border-l-[color:hsl(var(--level4))]; }
+.level5-content { @apply pl-8 border-l-[color:hsl(var(--level5))]; }
+.level6-content { @apply pl-10 border-l-[color:hsl(var(--level6))]; }
 
 /* Footnote Styles */
 .footnote-ref {
