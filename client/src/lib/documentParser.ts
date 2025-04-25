@@ -91,7 +91,39 @@ export function parseDocument(content: string): ParsedDocument {
     }
   });
   
-  // Process text level tags
+  // Pré-processamento: procura tags de nível dentro de text_level
+  // Isso é necessário porque no seu formato, os níveis 3, 4, etc. estão dentro de text_level
+  const nestedLevelRegex = /{{text_level}}([\s\S]*?){{-text_level}}/g;
+  let nestedLevelMatch: RegExpExecArray | null;
+  
+  while ((nestedLevelMatch = nestedLevelRegex.exec(normalizedContent)) !== null) {
+    if (!nestedLevelMatch || !nestedLevelMatch[1]) continue;
+    
+    const nestedContent = nestedLevelMatch[1];
+    
+    // Procura por tags de nível dentro do conteúdo text_level
+    for (const { regex, level } of levelTags) {
+      if (level < 3) continue; // Processa apenas level3 e superiores, que geralmente estão dentro de text_level
+      
+      const levelRegexInner = new RegExp(`{{level${level}}}(.*?){{-level${level}}}`, 'gs');
+      let innerMatch: RegExpExecArray | null;
+      
+      while ((innerMatch = levelRegexInner.exec(nestedContent)) !== null) {
+        if (innerMatch && innerMatch[1]) {
+          // Adiciona o nó diretamente aos tokens
+          tokens.push({
+            level,
+            content: innerMatch[1].trim(),
+            isText: false, // Isso é importante - marcamos como não sendo texto
+            start: nestedLevelMatch.index + innerMatch.index,
+            end: nestedLevelMatch.index + innerMatch.index + innerMatch[0].length
+          });
+        }
+      }
+    }
+  }
+  
+  // Processa text_level tags como texto comum
   const textRegex = /{{text_level}}(.*?){{-text_level}}/gs;
   let textMatch: RegExpExecArray | null;
   while ((textMatch = textRegex.exec(normalizedContent)) !== null) {
@@ -99,6 +131,22 @@ export function parseDocument(content: string): ParsedDocument {
     
     // Further process the text to identify and categorize by level
     const textContent = textMatch[1];
+    
+    // Precisamos ignorar os trechos com tags de nível que já processamos
+    let shouldProcessAsText = true;
+    for (const { level } of levelTags) {
+      if (level < 3) continue; // Só verificamos level3 e superiores
+      
+      const levelRegexCheck = new RegExp(`{{level${level}}}.*?{{-level${level}}}`, 'gs');
+      if (levelRegexCheck.test(textContent)) {
+        shouldProcessAsText = false;
+        break;
+      }
+    }
+    
+    if (!shouldProcessAsText) continue;
+    
+    // Se chegamos aqui, é realmente conteúdo de texto sem tags de nível
     const lines = textContent.split("\n");
     
     // Process each line in the text section
@@ -108,18 +156,9 @@ export function parseDocument(content: string): ParsedDocument {
     lines.forEach((line, index) => {
       if (line === undefined) return;
       
-      // Check if line contains a level tag
+      // Check if line contains a level tag - isso é para compatibilidade
       let lineLevel = -1;
       let lineContent = line;
-      
-      for (const { regex, level } of levelTags) {
-        const levelMatch = line.match(regex);
-        if (levelMatch && levelMatch[1]) {
-          lineLevel = level;
-          lineContent = levelMatch[1].trim();
-          break;
-        }
-      }
       
       if (lineLevel >= 0) {
         // If we have accumulated text from previous lines, add it
@@ -157,7 +196,7 @@ export function parseDocument(content: string): ParsedDocument {
       }
     });
     
-    // If no structured content was found, add the whole text as one block
+    // If no tokens were added for this text section, add the whole text as one block
     if (tokens.length === 0 || tokens.every(t => !t.isText)) {
       tokens.push({
         level: 9, // High level for unstructured text
