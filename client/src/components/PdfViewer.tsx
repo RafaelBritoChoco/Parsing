@@ -1,127 +1,37 @@
-import React, { useState } from 'react';
-import { Document, Page, pdfjs } from 'react-pdf';
-import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from 'lucide-react';
-
-// Configurar worker do PDF.js
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+import React from 'react';
+import { FileText } from 'lucide-react';
 
 interface PdfViewerProps {
   pdfUrl: string;
 }
 
 export default function PdfViewer({ pdfUrl }: PdfViewerProps) {
-  const [numPages, setNumPages] = useState<number | null>(null);
-  const [pageNumber, setPageNumber] = useState(1);
-  const [scale, setScale] = useState(1.0);
-
-  function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
-    setNumPages(numPages);
-  }
-
-  function changePage(offset: number) {
-    setPageNumber(prevPageNumber => {
-      const newPageNumber = prevPageNumber + offset;
-      if (numPages !== null) {
-        return Math.min(Math.max(1, newPageNumber), numPages);
-      }
-      return prevPageNumber;
-    });
-  }
-
-  function previousPage() {
-    changePage(-1);
-  }
-
-  function nextPage() {
-    changePage(1);
-  }
-
-  function zoomIn() {
-    setScale(prevScale => Math.min(prevScale + 0.1, 2.0));
-  }
-
-  function zoomOut() {
-    setScale(prevScale => Math.max(prevScale - 0.1, 0.5));
-  }
 
   return (
-    <div className="flex flex-col items-center">
-      <div className="bg-gray-50 p-4 mb-4 rounded-lg border border-gray-200 w-full overflow-auto">
-        <Document
-          file={pdfUrl}
-          onLoadSuccess={onDocumentLoadSuccess}
-          loading={
-            <div className="flex justify-center items-center py-20">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
-            </div>
-          }
-          error={
-            <div className="text-center py-10">
-              <p className="text-red-500 font-medium">Erro ao carregar o documento</p>
-              <p className="text-sm text-gray-500 mt-2">
-                Verifique se o formato do arquivo é suportado ou tente novamente.
-              </p>
-            </div>
-          }
-          className="pdf-document"
+    <div className="flex flex-col items-center p-4">
+      <div className="w-full p-8 bg-gray-50 rounded-lg border border-gray-200 flex flex-col items-center justify-center text-center">
+        <FileText className="w-16 h-16 text-purple-500 mb-4" />
+        <h3 className="text-lg font-medium mb-2">Documento carregado com sucesso</h3>
+        <p className="text-gray-500 mb-4">
+          O documento foi carregado e está pronto para visualização. 
+          Você pode usar o link abaixo para abrir o documento em uma nova janela.
+        </p>
+        <a 
+          href={pdfUrl} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
         >
-          <Page 
-            pageNumber={pageNumber} 
-            scale={scale}
-            renderTextLayer={false}
-            renderAnnotationLayer={false}
-            className="pdf-page"
-          />
-        </Document>
+          <FileText className="w-4 h-4" />
+          Abrir documento original
+        </a>
       </div>
-
-      <div className="flex items-center gap-4 mb-6">
-        <div className="flex items-center">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={zoomOut}
-            className="rounded-r-none border-r-0"
-          >
-            <ZoomOut className="h-4 w-4" />
-          </Button>
-          <span className="px-3 py-1 border border-gray-200 bg-white text-sm">
-            {Math.round(scale * 100)}%
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={zoomIn}
-            className="rounded-l-none border-l-0"
-          >
-            <ZoomIn className="h-4 w-4" />
-          </Button>
-        </div>
-
-        <div className="flex items-center">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={previousPage}
-            disabled={pageNumber <= 1}
-            className="rounded-r-none border-r-0"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <span className="px-3 py-1 border border-gray-200 bg-white text-sm">
-            {pageNumber} / {numPages || '--'}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={nextPage}
-            disabled={numPages !== null && pageNumber >= numPages}
-            className="rounded-l-none border-l-0"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
+      
+      <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-100 text-sm text-blue-800 max-w-xl">
+        <p>
+          <strong>Dica:</strong> Para comparar melhor, posicione o documento original em uma janela 
+          separada ao lado desta aplicação. Isso facilitará a verificação detalhada das diferenças.
+        </p>
       </div>
     </div>
   );
