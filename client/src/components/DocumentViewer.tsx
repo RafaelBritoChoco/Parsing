@@ -57,9 +57,10 @@ export default function DocumentViewer({ document: initialDocument, onReset }: D
             result += buildRawText(node.children, depth + 1);
           }
         } else {
-          // Para nós de texto, apenas adicionamos o conteúdo bruto
+          // Para nós de texto, sempre exibimos as tags de text_level
           if (node.level > 0) {
-            result += `{{text_level}}${node.content}{{-text_level}}\n\n`;
+            // Garantimos que todas as tags {{text_level}} estejam visíveis e claramente marcadas
+            result += `{{text_level}}\n${node.content}\n{{-text_level}}\n\n`;
           } else {
             result += `${node.content}\n\n`;
           }
@@ -74,7 +75,7 @@ export default function DocumentViewer({ document: initialDocument, onReset }: D
       let result = "\n\n";
       
       for (const footnote of documentData.footnotes) {
-        result += `{{footnote${footnote.id}}}${footnote.content}{{-footnote${footnote.id}}}\n`;
+        result += `{{footnote${footnote.id}}}\n${footnote.content}\n{{-footnote${footnote.id}}}\n\n`;
       }
       
       return result;

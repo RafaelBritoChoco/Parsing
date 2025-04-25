@@ -310,3 +310,15 @@
 pre {
   @apply whitespace-pre-wrap break-words;
 }
+
+/* Estilo de cor para modo de edição - tags nos editores */
+.tag-level0 { @apply bg-red-100 text-red-800 font-semibold px-1 rounded; }
+.tag-level1 { @apply bg-blue-100 text-blue-800 font-semibold px-1 rounded; }
+.tag-level2 { @apply bg-green-100 text-green-800 font-semibold px-1 rounded; }
+.tag-level3 { @apply bg-yellow-100 text-yellow-800 font-semibold px-1 rounded; }
+.tag-level4 { @apply bg-purple-100 text-purple-800 font-semibold px-1 rounded; }
+.tag-level5 { @apply bg-pink-100 text-pink-800 font-semibold px-1 rounded; }
+.tag-level6 { @apply bg-indigo-100 text-indigo-800 font-semibold px-1 rounded; }
+.tag-text-level { @apply bg-orange-100 text-orange-800 font-semibold px-1 rounded; }
+.tag-footnote { @apply bg-teal-100 text-teal-800 font-semibold px-1 rounded; }
+.tag-footnumber { @apply bg-cyan-100 text-cyan-800 font-semibold px-1 rounded; }
