@@ -359,14 +359,14 @@
   @apply border-l-2 border-transparent mb-2;
 }
 
-/* Espaçamento progressivo para níveis mais aninhados - reduzido */
-.level0-content { @apply pl-2 border-l-[color:hsl(var(--level0))]; }
-.level1-content { @apply pl-3 border-l-[color:hsl(var(--level1))]; }
-.level2-content { @apply pl-4 border-l-[color:hsl(var(--level2))]; }
-.level3-content { @apply pl-5 border-l-[color:hsl(var(--level3))]; }
-.level4-content { @apply pl-6 border-l-[color:hsl(var(--level4))]; }
-.level5-content { @apply pl-8 border-l-[color:hsl(var(--level5))]; }
-.level6-content { @apply pl-10 border-l-[color:hsl(var(--level6))]; }
+/* Espaçamento progressivo para níveis mais aninhados - com fundos sutis */
+.level0-content { @apply pl-2 rounded-l my-1 py-1 bg-gradient-to-r from-blue-50/20 to-transparent; }
+.level1-content { @apply pl-3 rounded-l my-1 py-1 bg-gradient-to-r from-red-50/20 to-transparent; }
+.level2-content { @apply pl-4 rounded-l my-1 py-1 bg-gradient-to-r from-orange-50/20 to-transparent; }
+.level3-content { @apply pl-5 rounded-l my-1 py-1 bg-gradient-to-r from-amber-50/20 to-transparent; }
+.level4-content { @apply pl-6 rounded-l my-1 py-1 bg-gradient-to-r from-green-50/20 to-transparent; }
+.level5-content { @apply pl-8 rounded-l my-1 py-1 bg-gradient-to-r from-purple-50/20 to-transparent; }
+.level6-content { @apply pl-10 rounded-l my-1 py-1 bg-gradient-to-r from-pink-50/20 to-transparent; }
 
 /* Footnote Styles */
 .footnote-ref {

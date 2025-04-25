@@ -48,7 +48,7 @@ export default function DocumentContent({ nodes, onFootnoteClick }: DocumentCont
 
     const getHeadingSize = (level: number, isTextLevel: boolean = false): string => {
       if (isTextLevel) {
-        // Dentro de text_level, sem negrito e com fonte menor
+        // Dentro de text_level, sem negrito e com fonte normal
         switch (level) {
           case 0: return "text-xl font-normal mb-2";
           case 1: return "text-lg font-normal mb-1.5";
@@ -58,24 +58,24 @@ export default function DocumentContent({ nodes, onFootnoteClick }: DocumentCont
           default: return "text-xs font-normal mb-0.5";
         }
       } else {
-        // Fora de text_level, com negrito e tamanho normal
+        // Fora de text_level, com negrito, maior e mais destaque
         switch (level) {
-          case 0: return "text-2xl font-bold mb-3";
-          case 1: return "text-xl font-bold mb-2";
-          case 2: return "text-lg font-bold mb-1.5";
-          case 3: return "text-base font-bold mb-1";
-          case 4: return "text-sm font-bold mb-0.5";
-          default: return "text-xs font-bold mb-0.5";
+          case 0: return "text-3xl font-bold mb-4";
+          case 1: return "text-2xl font-bold mb-3";
+          case 2: return "text-xl font-bold mb-2";
+          case 3: return "text-lg font-bold mb-1.5";
+          case 4: return "text-base font-bold mb-1";
+          default: return "text-sm font-bold mb-0.5";
         }
       }
     };
 
-    // Sistema de cores conforme solicitado
+    // Sistema de cores atualizado conforme solicitação
     const getLevelColor = (level: number): string => {
       switch(level) {
         case 1: return "text-red-600"; // Vermelho para level1
         case 2: return "text-orange-500"; // Laranja para level2
-        case 3: return "text-blue-600"; // Azul para level3
+        case 3: return "text-amber-500"; // Âmbar (mais claro) para level3
         case 4: return "text-green-600"; // Verde para level4
         case 5: return "text-purple-600"; // Roxo para level5
         case 6: return "text-pink-600"; // Rosa para level6
@@ -92,8 +92,8 @@ export default function DocumentContent({ nodes, onFootnoteClick }: DocumentCont
           key={node.id}
           className={`mb-3 ${
             isInsideTextLevel 
-              ? 'text-sm font-normal text-gray-700 leading-relaxed' 
-              : 'text-base font-medium bg-gradient-to-r from-blue-50 to-white px-3 py-2 rounded shadow-sm border-l-2 border-blue-300'
+              ? 'text-base font-normal text-gray-700 leading-relaxed' 
+              : 'text-base font-semibold bg-gradient-to-r from-blue-50 to-white px-4 py-3 rounded shadow-sm'
           }`}
           dangerouslySetInnerHTML={{ 
             __html: processFootnoteRefs(node.content) 
@@ -114,8 +114,13 @@ export default function DocumentContent({ nodes, onFootnoteClick }: DocumentCont
       );
     } else {
       // Determina se este nó está dentro de text_level
-      // Para fins de demonstração, marcamos que os níveis 2+ geralmente estão dentro de text_level
-      const isInTextLevel = node.level >= 2;
+      // Se o nível for 3 ou superior, ou se já estiver marcado como dentro de text_level
+      const isInTextLevel = isInsideTextLevel || false;
+      
+      // Cabeçalhos fora de text_level devem ter um estilo mais destacado
+      const headingStyle = isInTextLevel 
+        ? "py-2 px-3" 
+        : "py-3 px-4 bg-gradient-to-r from-slate-50 to-white rounded-lg shadow-sm mb-2";
       
       const processedHeadingContent = node.content.includes("FOOTNOTE") || 
         node.content.includes("{{footnotenumber") ? 
@@ -132,15 +137,19 @@ export default function DocumentContent({ nodes, onFootnoteClick }: DocumentCont
             }
           }} /> 
         : <>{node.content}</>;
+      
+      // Cor específica para level3 (ficará com uma cor mais clara para o texto)
+      const levelColor = node.level === 3 
+        ? "text-amber-600" // Laranja mais claro/amber para level3
+        : getLevelColor(node.level);
         
       return (
         <section key={node.id} className={isRoot ? "" : "mb-3"}>
-          <h2 className={`${getHeadingSize(node.level, isInTextLevel)} ${getLevelColor(node.level)} 
-            ${isInTextLevel ? 'text-gray-700' : ''}`}>
+          <h2 className={`${getHeadingSize(node.level, isInTextLevel)} ${levelColor} ${headingStyle}`}>
             {processedHeadingContent}
           </h2>
           
-          <div className={`level-content level${node.level}-content`}>
+          <div className={isInTextLevel ? "pl-4" : "px-2 py-1"}>
             {node.children.map(child => renderContent(child, false, isInTextLevel))}
           </div>
         </section>
