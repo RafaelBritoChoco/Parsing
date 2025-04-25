@@ -20,58 +20,42 @@ const highlightWithColors = (code: string) => {
   let formattedCode = code;
 
   // Colorir usando classes CSS em vez de estilos inline - isso resolve o problema de seleção
+  // Tratamento simplificado apenas para as tags {{levelX}} e {{-levelX}}
+  // Isso evita o problema de caracteres estranhos após as tags
+  
   // Nível 1 - Vermelho
-  formattedCode = formattedCode.replace(
-    /(\{\{level1\}\})([\s\S]*?)(\{\{-level1\}\})/g, 
-    '<span class="level1">$1</span><span class="level1-content">$2</span><span class="level1">$3</span>'
-  );
+  formattedCode = formattedCode.replace(/\{\{level1\}\}/g, '<span class="level1">{{level1}}</span>');
+  formattedCode = formattedCode.replace(/\{\{-level1\}\}/g, '<span class="level1">{{-level1}}</span>');
   
   // Nível 2 - Laranja
-  formattedCode = formattedCode.replace(
-    /(\{\{level2\}\})([\s\S]*?)(\{\{-level2\}\})/g, 
-    '<span class="level2">$1</span><span class="level2-content">$2</span><span class="level2">$3</span>'
-  );
+  formattedCode = formattedCode.replace(/\{\{level2\}\}/g, '<span class="level2">{{level2}}</span>');
+  formattedCode = formattedCode.replace(/\{\{-level2\}\}/g, '<span class="level2">{{-level2}}</span>');
   
   // Nível 3 - Azul
-  formattedCode = formattedCode.replace(
-    /(\{\{level3\}\})([\s\S]*?)(\{\{-level3\}\})/g, 
-    '<span class="level3">$1</span><span class="level3-content">$2</span><span class="level3">$3</span>'
-  );
+  formattedCode = formattedCode.replace(/\{\{level3\}\}/g, '<span class="level3">{{level3}}</span>');
+  formattedCode = formattedCode.replace(/\{\{-level3\}\}/g, '<span class="level3">{{-level3}}</span>');
   
   // Nível 4 - Verde
-  formattedCode = formattedCode.replace(
-    /(\{\{level4\}\})([\s\S]*?)(\{\{-level4\}\})/g, 
-    '<span class="level4">$1</span><span class="level4-content">$2</span><span class="level4">$3</span>'
-  );
+  formattedCode = formattedCode.replace(/\{\{level4\}\}/g, '<span class="level4">{{level4}}</span>');
+  formattedCode = formattedCode.replace(/\{\{-level4\}\}/g, '<span class="level4">{{-level4}}</span>');
   
   // Nível 5 - Rosa
-  formattedCode = formattedCode.replace(
-    /(\{\{level5\}\})([\s\S]*?)(\{\{-level5\}\})/g, 
-    '<span class="level5">$1</span><span class="level5-content">$2</span><span class="level5">$3</span>'
-  );
+  formattedCode = formattedCode.replace(/\{\{level5\}\}/g, '<span class="level5">{{level5}}</span>');
+  formattedCode = formattedCode.replace(/\{\{-level5\}\}/g, '<span class="level5">{{-level5}}</span>');
   
   // Nível 6 - Mostarda
-  formattedCode = formattedCode.replace(
-    /(\{\{level6\}\})([\s\S]*?)(\{\{-level6\}\})/g, 
-    '<span class="level6">$1</span><span class="level6-content">$2</span><span class="level6">$3</span>'
-  );
+  formattedCode = formattedCode.replace(/\{\{level6\}\}/g, '<span class="level6">{{level6}}</span>');
+  formattedCode = formattedCode.replace(/\{\{-level6\}\}/g, '<span class="level6">{{-level6}}</span>');
   
-  // Níveis genéricos (7, 8, 9, etc.)
-  // Vamos tratar apenas níveis 7-9 explicitamente para evitar problemas com a substituição
-  formattedCode = formattedCode.replace(
-    /(\{\{level7\}\})([\s\S]*?)(\{\{-level7\}\})/g, 
-    '<span class="level7">$1</span><span class="level7-content">$2</span><span class="level7">$3</span>'
-  );
+  // Níveis 7-9 com o mesmo padrão simplificado para evitar caracteres estranhos
+  formattedCode = formattedCode.replace(/\{\{level7\}\}/g, '<span class="level7">{{level7}}</span>');
+  formattedCode = formattedCode.replace(/\{\{-level7\}\}/g, '<span class="level7">{{-level7}}</span>');
   
-  formattedCode = formattedCode.replace(
-    /(\{\{level8\}\})([\s\S]*?)(\{\{-level8\}\})/g, 
-    '<span class="level8">$1</span><span class="level8-content">$2</span><span class="level8">$3</span>'
-  );
+  formattedCode = formattedCode.replace(/\{\{level8\}\}/g, '<span class="level8">{{level8}}</span>');
+  formattedCode = formattedCode.replace(/\{\{-level8\}\}/g, '<span class="level8">{{-level8}}</span>');
   
-  formattedCode = formattedCode.replace(
-    /(\{\{level9\}\})([\s\S]*?)(\{\{-level9\}\})/g, 
-    '<span class="level9">$1</span><span class="level9-content">$2</span><span class="level9">$3</span>'
-  );
+  formattedCode = formattedCode.replace(/\{\{level9\}\}/g, '<span class="level9">{{level9}}</span>');
+  formattedCode = formattedCode.replace(/\{\{-level9\}\}/g, '<span class="level9">{{-level9}}</span>');
   
   // Tratamento simplificado apenas para as tags text_level
   formattedCode = formattedCode.replace(/\{\{text_level\}\}/g, '<span class="text-level">{{text_level}}</span>');
@@ -186,8 +170,8 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
         // Processamos os nós regulares
         for (const node of regularNodes) {
           if (!node.isText) {
-            // Formato exato: tag de abertura na própria linha, conteúdo, tag de fechamento na própria linha
-            result += `\n\n{{level${node.level}}}\n${node.content}\n{{-level${node.level}}}\n\n`;
+            // Formato com a tag de fechamento {{-levelx}} no final da mesma linha que o conteúdo
+            result += `\n\n{{level${node.level}}}\n${node.content} {{-level${node.level}}}\n\n`;
             
             // Processar filhos
             if (node.children.length > 0) {
@@ -206,8 +190,8 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
           
           // Processar cada nó dentro do text_level
           for (const node of textLevelNodes) {
-            // Formato exato: tag de abertura, conteúdo e tag de fechamento em linhas separadas
-            result += `{{level${node.level}}}\n${node.content}\n{{-level${node.level}}}\n\n`;
+            // Formato com tag de fechamento {{-levelx}} no final da mesma linha que o conteúdo
+            result += `{{level${node.level}}}\n${node.content} {{-level${node.level}}}\n\n`;
             
             // Processar filhos se houver
             if (node.children.length > 0) {
