@@ -6,6 +6,41 @@ import { useToast } from "@/hooks/use-toast";
 import { parseDocument } from "@/lib/documentParser";
 import { type ParsedDocument } from "@/lib/types";
 
+/**
+ * Função que adiciona quebras de linha antes de cada {{levelx}} (onde x é qualquer número)
+ * Não adiciona quebras antes de {{-levelx}}
+ * Garante que {{text_level}} sempre esteja sozinho em sua própria linha
+ */
+function formatWithLineBreaks(content: string): string {
+  let processedContent = content;
+  
+  // Passo 1: Adicionar quebra de linha antes de qualquer {{level seguido de número
+  // Isso resolve tanto os casos no início da linha quanto no meio
+  const levelRegex = /(^|[^\n])({{level\d+}})/g;
+  processedContent = processedContent.replace(levelRegex, "$1\n$2");
+  
+  // Passo 2: Adicionar quebra de linha antes de qualquer {{text_level}}
+  const textLevelOpenRegex = /(^|[^\n])({{text_level}})/g;
+  processedContent = processedContent.replace(textLevelOpenRegex, "$1\n$2\n");
+  
+  // Passo 3: Adicionar quebra de linha antes de qualquer {{-text_level}}
+  const textLevelCloseRegex = /(^|[^\n])({{-text_level}})/g;
+  processedContent = processedContent.replace(textLevelCloseRegex, "$1\n$2");
+  
+  // Passo 4: Verificar caso especial onde {{text_level}} possa estar junto com outros conteúdos
+  // Garantir que {{text_level}} esteja sozinho na linha
+  const isolateTextLevelRegex = /(.+)({{text_level}})/g;
+  processedContent = processedContent.replace(isolateTextLevelRegex, "$1\n$2");
+  
+  const isolateTextLevelCloseRegex = /({{-text_level}})(.+)/g;
+  processedContent = processedContent.replace(isolateTextLevelCloseRegex, "$1\n$2");
+  
+  // Passo 5: Remover linhas em branco duplicadas
+  processedContent = processedContent.replace(/\n\s*\n\s*\n/g, "\n\n");
+  
+  return processedContent;
+}
+
 interface FileUploadProps {
   onDocumentParsed: (document: ParsedDocument, originalContent: string) => void;
 }
@@ -28,14 +63,18 @@ export default function FileUpload({ onDocumentParsed }: FileUploadProps) {
     setIsLoading(true);
 
     try {
-      const content = await file.text();
+      let content = await file.text();
+      
+      // Preprocessamento para adicionar quebras de linha antes de cada {{levelx}}
+      content = formatWithLineBreaks(content);
+      
       const parsedDoc = parseDocument(content);
       
       if (parsedDoc.nodes.length === 0) {
         throw new Error("No valid document structure found in the file");
       }
       
-      // Passamos tanto o documento parseado quanto o conteúdo original
+      // Passamos tanto o documento parseado quanto o conteúdo formatado
       onDocumentParsed(parsedDoc, content);
     } catch (error) {
       toast({
