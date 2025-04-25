@@ -1,12 +1,16 @@
 import { type DocumentNode } from "@/lib/types";
 import TextLevelWrapper from "./TextLevelWrapper";
+import { useTextLevel } from "@/hooks/useTextLevel";
 
 interface DocumentContentProps {
   nodes: DocumentNode[];
   onFootnoteClick: (footnoteId: string) => void;
+  rawContent?: string | null;
 }
 
-export default function DocumentContent({ nodes, onFootnoteClick }: DocumentContentProps) {
+export default function DocumentContent({ nodes, onFootnoteClick, rawContent }: DocumentContentProps) {
+  // Use o hook para identificar nós dentro de {{text_level}}
+  const textLevelNodesMap = useTextLevel(rawContent, nodes);
   // O parâmetro isInsideTextLevel indica se este nó está dentro de {{text_level}}
   const renderContent = (node: DocumentNode, isRoot = false, isInsideTextLevel = false) => {
     // Process content to render footnote references
@@ -166,8 +170,10 @@ export default function DocumentContent({ nodes, onFootnoteClick }: DocumentCont
       ) : (
         <div>
           {nodes.map(node => {
-            // Se o nó for marcado como isText: true, ele está dentro de {{text_level}}
-            if (node.isText) {
+            // Se o nó for marcado como isText: true ou identificado pelo hook como parte de text_level
+            const isTextLevelNode = node.isText || textLevelNodesMap[node.id] === true;
+            
+            if (isTextLevelNode) {
               return (
                 <TextLevelWrapper key={node.id}>
                   {renderContent(node, true, true)}
