@@ -108,6 +108,7 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
   const [savedContent, setSavedContent] = useState<string>(originalContent || "");
   const [documentSaved, setDocumentSaved] = useState(!!originalContent);
   const [hasEdits, setHasEdits] = useState(false); // Rastreia se existem edições não salvas
+  const [comparisonMode, setComparisonMode] = useState(false); // Novo modo de comparação
 
   // Efeito para processar o documento quando for salvo ou ao alternar entre modos
   useEffect(() => {
@@ -231,6 +232,17 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
 
     const rawText = buildRawText(documentData.nodes) + buildFootnotes();
     return rawText;
+  };
+
+  // Função para alternar o modo de comparação
+  const toggleComparisonMode = () => {
+    // Se estamos saindo do modo de edição, precisamos desativar o modo de comparação
+    if (editMode) {
+      setEditMode(false);
+    }
+    
+    // Alternar o modo de comparação
+    setComparisonMode(!comparisonMode);
   };
 
   const toggleEditMode = () => {
