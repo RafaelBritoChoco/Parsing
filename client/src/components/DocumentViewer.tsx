@@ -102,13 +102,18 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
   const toggleEditMode = () => {
     if (!editMode) {
       // Entrando no modo de edição
-      const rawText = getDocumentRawText();
-      setRawContent(rawText);
-      setSavedContent(rawText);
+      // Usamos o conteúdo original se disponível, ou recriamos o documento
+      if (originalContent) {
+        setRawContent(originalContent);
+        setSavedContent(originalContent);
+      } else {
+        const rawText = getDocumentRawText();
+        setRawContent(rawText);
+        setSavedContent(rawText);
+      }
       setDocumentSaved(true);
     } else if (documentSaved) {
       // Voltando para o modo de visualização com alterações salvas
-      // Se houver conteúdo salvo, utilizamos ele
       setRawContent(savedContent);
     }
     setEditMode(!editMode);

@@ -5,6 +5,18 @@ import { type ParsedDocument } from "@/lib/types";
 
 export default function Home() {
   const [parsedDocument, setParsedDocument] = useState<ParsedDocument | null>(null);
+  const [originalContent, setOriginalContent] = useState<string>("");
+  
+  // Função para receber tanto o documento parseado quanto o conteúdo original
+  const handleDocumentParsed = (document: ParsedDocument, content: string) => {
+    setParsedDocument(document);
+    setOriginalContent(content);
+  };
+  
+  const handleReset = () => {
+    setParsedDocument(null);
+    setOriginalContent("");
+  };
   
   return (
     <div className="flex flex-col h-screen">
@@ -19,9 +31,13 @@ export default function Home() {
 
       <div className="flex flex-1 overflow-hidden">
         {!parsedDocument ? (
-          <FileUpload onDocumentParsed={setParsedDocument} />
+          <FileUpload onDocumentParsed={handleDocumentParsed} />
         ) : (
-          <DocumentViewer document={parsedDocument} onReset={() => setParsedDocument(null)} />
+          <DocumentViewer 
+            document={parsedDocument} 
+            originalContent={originalContent} 
+            onReset={handleReset} 
+          />
         )}
       </div>
     </div>
