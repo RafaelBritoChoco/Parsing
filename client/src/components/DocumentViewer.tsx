@@ -285,16 +285,16 @@ export default function DocumentViewer({ document: initialDocument, onReset }: D
       {/* Content Area */}
       <div className="flex-1 overflow-y-auto bg-white flex flex-col">
         {/* Barra de ferramentas para alternância entre modos de visualização e edição */}
-        <div className="sticky top-0 z-10 bg-white shadow-sm p-2 border-b flex justify-between items-center">
-          <div className="text-sm font-medium text-gray-600">
+        <div className="sticky top-0 z-10 bg-white shadow-sm px-4 py-3 border-b flex justify-between items-center">
+          <div className="text-sm font-medium bg-blue-50 px-3 py-1 rounded-full text-blue-600 border border-blue-100">
             {editMode ? 'Editing Mode - Raw Text Format' : 'Preview Mode'}
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <Button 
-              variant="outline" 
+              variant={editMode ? "outline" : "default"}
               size="sm"
               onClick={toggleEditMode}
-              className="gap-1"
+              className={`gap-1 px-4 rounded-full shadow-sm transition-all ${editMode ? "hover:bg-blue-50 hover:text-blue-600 border-blue-200" : "bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white"}`}
             >
               {editMode ? (
                 <>
@@ -315,7 +315,7 @@ export default function DocumentViewer({ document: initialDocument, onReset }: D
                   variant="outline"
                   size="sm"
                   onClick={handleSave}
-                  className="gap-1"
+                  className="gap-1 px-4 rounded-full border-green-200 text-green-600 hover:bg-green-50 hover:text-green-700 shadow-sm"
                 >
                   <Save className="h-4 w-4" />
                   <span>Salvar</span>
@@ -324,7 +324,7 @@ export default function DocumentViewer({ document: initialDocument, onReset }: D
                   variant="default"
                   size="sm"
                   onClick={handleDownload}
-                  className="gap-1"
+                  className="gap-1 px-4 rounded-full bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white shadow-sm"
                 >
                   <Download className="h-4 w-4" />
                   <span>Download</span>
@@ -335,22 +335,58 @@ export default function DocumentViewer({ document: initialDocument, onReset }: D
         </div>
       
         {editMode ? (
-          <div className="p-4 flex-1 flex flex-col">
+          <div className="p-6 flex-1 flex flex-col">
             <textarea
-              className="flex-1 font-mono text-sm p-4 border rounded-md min-h-[400px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex-1 font-mono text-sm p-5 border border-gray-200 rounded-lg min-h-[400px] focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-inner bg-gray-50"
               value={rawContent}
               onChange={(e) => setRawContent(e.target.value)}
               placeholder="Edit your document here..."
+              spellCheck="false"
             />
-            <div className="mt-4 p-4 bg-gray-50 rounded-md text-sm">
-              <h3 className="text-sm font-medium mb-2">Editing Tips:</h3>
-              <ul className="list-disc pl-4 space-y-1 text-xs">
-                <li>Use <code className="bg-gray-100 px-1 rounded">{'{{levelX}}...{{-levelX}}'}</code> to define document structure (X = 0-9)</li>
-                <li>Use <code className="bg-gray-100 px-1 rounded">{'{{text_level}}...{{-text_level}}'}</code> for content inside sections</li>
-                <li>Use <code className="bg-gray-100 px-1 rounded">{'{{footnotenumberX}}X{{-footnotenumberX}}'}</code> for footnote references</li>
-                <li>Use <code className="bg-gray-100 px-1 rounded">{'{{footnoteX}}...{{-footnoteX}}'}</code> to define footnotes</li>
-                <li>Clique em <strong>Salvar</strong> para salvar o documento antes de visualizá-lo</li>
-                <li>Use o botão <strong>Download</strong> para baixar o documento editado</li>
+            <div className="mt-6 p-5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100 shadow-sm">
+              <h3 className="text-sm font-medium mb-3 text-indigo-700 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Editing Tips
+              </h3>
+              <ul className="space-y-2 text-xs text-gray-700">
+                <li className="flex items-start">
+                  <span className="text-indigo-500 mr-2">•</span>
+                  <div>
+                    Use <code className="bg-white px-1.5 py-0.5 rounded-md border border-blue-100 font-bold text-blue-700">{'{{levelX}}...{{-levelX}}'}</code> to define document structure (X = 0-9)
+                  </div>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-indigo-500 mr-2">•</span>
+                  <div>
+                    Use <code className="bg-white px-1.5 py-0.5 rounded-md border border-blue-100 font-bold text-blue-700">{'{{text_level}}...{{-text_level}}'}</code> for content inside sections
+                  </div>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-indigo-500 mr-2">•</span>
+                  <div>
+                    Use <code className="bg-white px-1.5 py-0.5 rounded-md border border-blue-100 font-bold text-blue-700">{'{{footnotenumberX}}X{{-footnotenumberX}}'}</code> for footnote references
+                  </div>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-indigo-500 mr-2">•</span>
+                  <div>
+                    Use <code className="bg-white px-1.5 py-0.5 rounded-md border border-blue-100 font-bold text-blue-700">{'{{footnoteX}}...{{-footnoteX}}'}</code> to define footnotes
+                  </div>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-indigo-500 mr-2">•</span>
+                  <div>
+                    Clique em <span className="font-medium text-green-600">Salvar</span> para salvar o documento antes de visualizá-lo
+                  </div>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-indigo-500 mr-2">•</span>
+                  <div>
+                    Use o botão <span className="font-medium text-green-600">Download</span> para baixar o documento editado
+                  </div>
+                </li>
               </ul>
             </div>
           </div>

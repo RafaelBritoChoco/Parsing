@@ -68,10 +68,10 @@ export default function FileUpload({ onDocumentParsed }: FileUploadProps) {
 
   return (
     <div className="flex flex-col items-center justify-center w-full h-full p-6">
-      <Card className="w-full max-w-md mx-auto">
+      <Card className="w-full max-w-md mx-auto shadow-lg border-0">
         <CardContent className="pt-6">
           <div className="flex flex-col items-center mb-6">
-            <div className="text-center h-10 mb-2 font-bold text-primary text-lg">Digital Policy Alert</div>
+            <div className="text-center h-10 mb-2 font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent text-xl">Digital Policy Alert</div>
             <h2 className="text-2xl font-semibold text-center text-[color:hsl(var(--primary))]">
               Parsing Check
             </h2>
@@ -81,8 +81,10 @@ export default function FileUpload({ onDocumentParsed }: FileUploadProps) {
           </div>
           
           <div 
-            className={`mb-6 border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-              isDragging ? 'bg-[color:hsl(var(--secondary))] border-[color:hsl(var(--primary))]' : 'border-[color:hsl(var(--muted))] hover:bg-[color:hsl(var(--secondary))]'
+            className={`mb-6 border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200 shadow-sm ${
+              isDragging 
+                ? 'bg-blue-50 border-blue-300 shadow-md scale-[1.02]' 
+                : 'border-[color:hsl(var(--muted))] hover:bg-gray-50 hover:border-gray-300 hover:shadow-md hover:scale-[1.01]'
             }`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -91,18 +93,20 @@ export default function FileUpload({ onDocumentParsed }: FileUploadProps) {
           >
             {isLoading ? (
               <div className="flex flex-col items-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[color:hsl(var(--primary))]"></div>
-                <p className="mt-2 text-sm">Parsing document...</p>
+                <div className="animate-spin rounded-full h-10 w-10 border-4 border-blue-100 border-t-blue-500"></div>
+                <p className="mt-3 text-sm font-medium text-gray-700">Parsing document...</p>
               </div>
             ) : (
               <>
-                <Upload className="mx-auto h-12 w-12 text-[color:hsl(var(--primary))]" />
-                <p className="mt-2 text-sm">Drag and drop your TXT file here</p>
-                <p className="text-xs mt-1">or</p>
+                <div className="bg-blue-50 mx-auto h-16 w-16 rounded-full flex items-center justify-center mb-2">
+                  <Upload className="h-8 w-8 text-blue-500" />
+                </div>
+                <p className="mt-2 text-sm font-medium text-gray-700">Drag and drop your TXT file here</p>
+                <p className="text-xs mt-1 text-gray-500">or</p>
                 <Button 
-                  variant="secondary" 
+                  variant="default" 
                   size="sm" 
-                  className="mt-2"
+                  className="mt-3 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-medium px-4 py-2 rounded-full transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                 >
                   <FileUp className="mr-2 h-4 w-4" />
                   Browse files
@@ -118,17 +122,29 @@ export default function FileUpload({ onDocumentParsed }: FileUploadProps) {
             )}
           </div>
           
-          <div className="text-sm mt-4">
-            <p className="font-medium">Steps:</p>
-            <ol className="list-decimal list-inside mt-1 space-y-2">
-              <li>
-                <span className="font-medium">Upload your parsed TXT</span>
+          <div className="text-sm mt-8 bg-gray-50 p-4 rounded-xl border border-gray-100 shadow-sm">
+            <p className="font-medium text-gray-700 mb-3">Steps:</p>
+            <ol className="space-y-3">
+              <li className="flex items-start">
+                <div className="bg-blue-500 text-white w-6 h-6 rounded-full flex items-center justify-center mr-3 flex-shrink-0 shadow-sm">1</div>
+                <div>
+                  <span className="font-medium text-gray-700">Upload your parsed TXT</span>
+                  <p className="text-xs text-gray-500 mt-1">Drag and drop or use the Browse files button</p>
+                </div>
               </li>
-              <li>
-                <span className="font-medium">Check for mistakes and errors</span>
+              <li className="flex items-start">
+                <div className="bg-blue-500 text-white w-6 h-6 rounded-full flex items-center justify-center mr-3 flex-shrink-0 shadow-sm">2</div>
+                <div>
+                  <span className="font-medium text-gray-700">Check for mistakes and errors</span>
+                  <p className="text-xs text-gray-500 mt-1">Review the document structure and content</p>
+                </div>
               </li>
-              <li>
-                <span className="font-medium">Correct at Edit Mode, save and Download your file corrected</span>
+              <li className="flex items-start">
+                <div className="bg-blue-500 text-white w-6 h-6 rounded-full flex items-center justify-center mr-3 flex-shrink-0 shadow-sm">3</div>
+                <div>
+                  <span className="font-medium text-gray-700">Correct at Edit Mode</span>
+                  <p className="text-xs text-gray-500 mt-1">Edit, save and download your corrected file</p>
+                </div>
               </li>
             </ol>
           </div>
