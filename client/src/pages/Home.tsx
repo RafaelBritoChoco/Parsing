@@ -29,7 +29,7 @@ export default function Home() {
               alt="Company Logo" 
               className="h-8 w-auto"
             />
-            <h1 className="text-xl font-semibold">DPA Parser Checker</h1>
+            <h1 className="text-xl font-semibold">DPA Parsing Checker</h1>
           </div>
           <div className="hidden md:block">
             <span className="text-sm">Tool for checking your parsing before uploading to Clairk</span>
