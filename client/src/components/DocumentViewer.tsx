@@ -389,7 +389,7 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
 
   // Filter out nodes relevant to the current selection for display
   const getContentNodes = (): DocumentNode[] => {
-    if (!selectedNodeId) return documentData.nodes; // Se não há seleção, mostra o documento inteiro
+    if (!selectedNodeId) return [];
 
     // Find the selected node
     const findNode = (nodes: DocumentNode[], id: string): DocumentNode | null => {
@@ -405,11 +405,15 @@ export default function DocumentViewer({ document: initialDocument, onReset, ori
     };
 
     const selectedNode = findNode(documentData.nodes, selectedNodeId);
-    if (!selectedNode) return documentData.nodes; // Se não encontrar o nó, mostra o documento inteiro
+    if (!selectedNode) return [];
 
-    // Sempre exibir o documento completo, independente do nível selecionado
-    // Isso permite que os text_levels sejam visualizados no contexto completo
-    return documentData.nodes;
+    // For level0 (document title), show the full document
+    if (selectedNode.level === 0) {
+      return documentData.nodes;
+    }
+
+    // Otherwise, show the node and its children
+    return [selectedNode];
   };
 
   return (

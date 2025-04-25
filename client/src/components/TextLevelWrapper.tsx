@@ -12,16 +12,16 @@ export default function TextLevelWrapper({ children }: TextLevelWrapperProps) {
   return (
     <div className="py-3 px-4 rounded-md my-3 overflow-hidden text-level-wrapper relative"
       style={{
-        backgroundColor: '#FFF8E0', // Amarelo mais claro e suave
-        border: '1px solid #FFE082', // Borda mais sutil
-        boxShadow: '0 2px 4px rgba(255, 215, 0, 0.15)' // Sombra mais suave
+        backgroundColor: '#FFEB98',
+        border: '2px solid #FFD700',
+        boxShadow: '0 4px 8px rgba(255, 215, 0, 0.3)'
       }}
     >
       {/* Barra de destaque à esquerda */}
-      <div className="absolute left-0 top-0 bottom-0 w-1 bg-yellow-400 rounded-l"></div>
+      <div className="absolute left-0 top-0 bottom-0 w-2 bg-yellow-500 rounded-l"></div>
       
       {/* Badge para indicar que é um text_level */}
-      <div className="absolute right-0 top-0 bg-yellow-400 text-white text-xs px-2 py-1 rounded-bl font-bold">
+      <div className="absolute right-0 top-0 bg-yellow-500 text-white text-xs px-2 py-1 rounded-bl font-bold">
         TEXT
       </div>
       
