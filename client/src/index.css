@@ -1,0 +1,124 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 215 25% 27%;
+  --muted: 60 4.8% 95.9%;
+  --muted-foreground: 25 5.3% 44.7%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 20 14.3% 4.1%;
+  --card: 0 0% 100%;
+  --card-foreground: 20 14.3% 4.1%;
+  --border: 20 5.9% 90%;
+  --input: 20 5.9% 90%;
+  --primary: 225 73% 57%;
+  --primary-foreground: 211 100% 99%;
+  --secondary: 60 4.8% 95.9%;
+  --secondary-foreground: 24 9.8% 10%;
+  --accent: 36 100% 50%;
+  --accent-foreground: 24 9.8% 10%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 60 9.1% 97.8%;
+  --ring: 20 14.3% 4.1%;
+  --radius: 0.5rem;
+
+  /* Level colors */
+  --level0: 222 83% 33%;
+  --level1: 217 91% 54%;
+  --level2: 214 94% 61%;
+  --level3: 213 97% 68%;
+  --level4: 213 94% 79%;
+  --level5: 214 100% 87%;
+  --level6: 213 100% 93%;
+}
+
+.dark {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --primary: 225 73% 57%;
+  --primary-foreground: 211 100% 99%;
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 36 100% 50%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 240 4.9% 83.9%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+/* Document Tree Styles */
+.document-tree li {
+  @apply list-none m-0 p-0 relative;
+}
+
+.document-tree ul {
+  @apply ml-6 relative;
+}
+
+.document-tree .caret {
+  @apply cursor-pointer select-none;
+}
+
+.document-tree .caret::before {
+  content: "\25B6";
+  @apply text-blue-600 inline-block mr-1.5 transition-transform duration-200 ease-in-out text-xs;
+}
+
+.document-tree .caret-down::before {
+  @apply transform rotate-90;
+}
+
+.document-tree .nested {
+  @apply hidden;
+}
+
+.document-tree .active {
+  @apply block;
+}
+
+/* Document Level Styles */
+.level-content {
+  @apply pl-2 border-l-2 border-transparent mb-2;
+}
+
+.level0-content { @apply border-l-[color:hsl(var(--level0))]; }
+.level1-content { @apply border-l-[color:hsl(var(--level1))]; }
+.level2-content { @apply border-l-[color:hsl(var(--level2))]; }
+.level3-content { @apply border-l-[color:hsl(var(--level3))]; }
+.level4-content { @apply border-l-[color:hsl(var(--level4))]; }
+.level5-content { @apply border-l-[color:hsl(var(--level5))]; }
+.level6-content { @apply border-l-[color:hsl(var(--level6))]; }
+
+/* Footnote Styles */
+.footnote-ref {
+  @apply text-[color:hsl(var(--accent))] font-semibold cursor-pointer text-xs align-super;
+}
+
+.highlight-footnote {
+  @apply bg-amber-50 transition-colors duration-1000;
+}
+
+/* Text sizes and formatting */
+pre {
+  @apply whitespace-pre-wrap break-words;
+}
