@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Upload, Eye, Info } from 'lucide-react';
+import { Upload, Eye, Info, FileText, Check } from 'lucide-react';
 
 interface PdfComparisonProps {
   onPdfLoad: (pdfUrl: string) => void;
@@ -9,6 +9,7 @@ interface PdfComparisonProps {
 export default function PdfComparison({ onPdfLoad }: PdfComparisonProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isPdf, setIsPdf] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -16,13 +17,17 @@ export default function PdfComparison({ onPdfLoad }: PdfComparisonProps) {
     if (files && files.length > 0) {
       const file = files[0];
       
-      // Verifica se é um PDF ou outro tipo de arquivo de documento
+      // Verifica se é um documento suportado
       if (file.type === 'application/pdf' || 
           file.type === 'application/msword' || 
           file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
           file.type === 'text/plain') {
         
         setSelectedFile(file);
+        
+        // Verifica se é um PDF para informar ao usuário
+        const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+        setIsPdf(isPdf);
         
         // Cria uma URL para o arquivo
         const objectUrl = URL.createObjectURL(file);
@@ -60,7 +65,8 @@ export default function PdfComparison({ onPdfLoad }: PdfComparisonProps) {
             </div>
             <h3 className="text-lg font-medium text-gray-800">Carregar documento original</h3>
             <p className="text-sm text-gray-500 text-center mt-2 mb-4">
-              Arraste ou selecione um arquivo PDF, DOC, DOCX ou TXT para comparar com o documento processado
+              Selecione um arquivo PDF para visualizá-lo diretamente na aplicação, 
+              ou outros formatos (DOC, DOCX, TXT) para comparação.
             </p>
           </div>
           
@@ -76,12 +82,24 @@ export default function PdfComparison({ onPdfLoad }: PdfComparisonProps) {
         <div className="w-full">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
-              <div className="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center mr-3">
-                <Eye className="h-5 w-5 text-green-500" />
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center mr-3 ${isPdf ? 'bg-green-50' : 'bg-blue-50'}`}>
+                {isPdf ? (
+                  <FileText className="h-5 w-5 text-green-500" />
+                ) : (
+                  <Eye className="h-5 w-5 text-blue-500" />
+                )}
               </div>
               <div>
-                <h4 className="text-sm font-medium text-gray-800">{selectedFile.name}</h4>
-                <p className="text-xs text-gray-500">{(selectedFile.size / 1024).toFixed(2)} KB</p>
+                <div className="flex items-center gap-2">
+                  <h4 className="text-sm font-medium text-gray-800">{selectedFile.name}</h4>
+                  {isPdf && (
+                    <span className="inline-flex items-center gap-1 bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">
+                      <Check className="h-3 w-3" />
+                      Visualização direta
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">{(selectedFile.size / 1024).toFixed(2)} KB</p>
               </div>
             </div>
             <Button
@@ -96,10 +114,19 @@ export default function PdfComparison({ onPdfLoad }: PdfComparisonProps) {
           
           <div className="p-4 bg-blue-50 rounded-lg border border-blue-100 flex items-start">
             <Info className="h-5 w-5 text-blue-500 mr-2 flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-blue-700">
-              Agora você pode comparar seu documento original com a versão processada. 
-              Use a rolagem sincronizada para navegar por ambos os documentos simultaneamente.
-            </p>
+            <div className="text-xs text-blue-700">
+              {isPdf ? (
+                <p>
+                  O PDF será exibido diretamente na aplicação. 
+                  Use a rolagem sincronizada para navegar por ambos os documentos simultaneamente.
+                </p>
+              ) : (
+                <p>
+                  Este tipo de documento não pode ser visualizado diretamente na aplicação.
+                  Você pode abri-lo em uma janela separada para fazer a comparação.
+                </p>
+              )}
+            </div>
           </div>
         </div>
       )}

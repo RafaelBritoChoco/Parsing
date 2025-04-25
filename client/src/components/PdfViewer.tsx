@@ -1,37 +1,46 @@
 import React from 'react';
-import { FileText } from 'lucide-react';
+import { ZoomIn, ZoomOut } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface PdfViewerProps {
   pdfUrl: string;
 }
 
 export default function PdfViewer({ pdfUrl }: PdfViewerProps) {
+  // Verificando se é um PDF com base na extensão ou tipo MIME
+  const isPdf = pdfUrl.toLowerCase().endsWith('.pdf') || 
+                pdfUrl.toLowerCase().includes('application/pdf');
 
   return (
-    <div className="flex flex-col items-center p-4">
-      <div className="w-full p-8 bg-gray-50 rounded-lg border border-gray-200 flex flex-col items-center justify-center text-center">
-        <FileText className="w-16 h-16 text-purple-500 mb-4" />
-        <h3 className="text-lg font-medium mb-2">Documento carregado com sucesso</h3>
-        <p className="text-gray-500 mb-4">
-          O documento foi carregado e está pronto para visualização. 
-          Você pode usar o link abaixo para abrir o documento em uma nova janela.
-        </p>
-        <a 
-          href={pdfUrl} 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
-        >
-          <FileText className="w-4 h-4" />
-          Abrir documento original
-        </a>
+    <div className="flex flex-col w-full h-full">
+      {/* Cabeçalho com informações */}
+      <div className="bg-gray-50 p-2 border-b border-gray-200">
+        <h3 className="text-sm font-medium text-gray-700">Documento Original</h3>
       </div>
       
-      <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-100 text-sm text-blue-800 max-w-xl">
-        <p>
-          <strong>Dica:</strong> Para comparar melhor, posicione o documento original em uma janela 
-          separada ao lado desta aplicação. Isso facilitará a verificação detalhada das diferenças.
-        </p>
+      {/* Visualizador de PDF incorporado */}
+      <div className="flex-1 w-full h-full overflow-auto bg-gray-50 relative">
+        {isPdf ? (
+          <iframe 
+            src={`${pdfUrl}#toolbar=0&navpanes=0`}
+            className="w-full h-full border-0 min-h-[500px]"
+            title="Documento PDF"
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center p-8 text-center h-full">
+            <p className="text-gray-500 mb-4">
+              Este documento não é um PDF e não pode ser visualizado diretamente no navegador.
+            </p>
+            <a 
+              href={pdfUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              Abrir em nova janela
+            </a>
+          </div>
+        )}
       </div>
     </div>
   );
