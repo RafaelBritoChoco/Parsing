@@ -10,7 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import dpaLogo from "@/assets/dpa-logo-new.png";
 
 // Interface para um script
 interface Script {
@@ -494,7 +493,7 @@ Todas as ${matches.length} notas de rodapé foram renumeradas em sequência. */\
           </Button>
           
           <img 
-            src={dpaLogo} 
+            src="/dpa-logo-new.png" 
             alt="Digital Policy Alert" 
             className="h-8 w-auto ml-2"
           />
